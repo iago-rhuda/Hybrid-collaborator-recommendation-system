@@ -18,11 +18,11 @@ class HalClient:
     )
 
   def fetch_data_science_publications(self):
-    """Gera um iterador/lista com todas as publicações de Data Science da UTC."""
+    """Creates an iterator/list with all publications of Data Science from the UTC."""
     start = 0
     all_docs = []
 
-    print("Consultando a API do HAL para publicações de Data Science...")
+    print("Consulting the HAL's API for Data Science publications...")
 
     while True:
       params = {
@@ -41,7 +41,7 @@ class HalClient:
       docs = data["docs"]
 
       if start == 0:
-        print(f"Total de publicações encontradas no HAL: {num_found}")
+        print(f"Total of publications found in HAL: {num_found}")
 
       if not docs:
         break

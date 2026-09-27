@@ -4,12 +4,12 @@ from database.neo4j_manager import Neo4jManager
 
 def run_pipeline():
   db = Neo4jManager()
-  db.setup_constraints()  # Garante que restrições de duplicata estejam ativas
+  db.setup_constraints()  # Ensures that duplicate restrictions are active.
 
   client = HalClient()
   docs = client.fetch_data_science_publications()
 
-  print(f"\nProcessando e inserindo {len(docs)} documentos no Neo4j...")
+  print(f"\nProcessing and inserting {len(docs)} documents into Neo4j...")
 
   for doc in docs:
     hal_id = doc.get("halId_s", doc.get("docid", "Unknown"))
@@ -18,7 +18,7 @@ def run_pipeline():
     doc_type = doc.get("docType_s", "Unknown")
     abstract = doc.get("abstract_s", [""])[0]
 
-    # Extração de listas
+    # Lists extractions
     auth_names = doc.get("authFullName_s", [])
     auth_ids_hal = doc.get("authIdHal_s", [])
     auth_ids_person = doc.get("authIdPerson_i", [])
@@ -26,7 +26,7 @@ def run_pipeline():
     if not labs:
       labs = doc.get("structName_s", [])
 
-    # Formatar autores para o Cypher
+    # Formatting authors for Cypher
     authors_list = []
     for i, name in enumerate(auth_names):
       h_id = (
@@ -49,11 +49,11 @@ def run_pipeline():
         "abstract": abstract,
     }
 
-    # Salva no Neo4j (o MERGE evita duplicatas automaticamente)
+    # Saves to Neo4j (MERGE automatically avoids duplicates)
     db.save_publication_data(doc_data, authors_list, labs)
 
   db.close()
-  print("\n[SUCESSO] Pipeline concluído! O grafo no Neo4j foi populado.")
+  print("\n[SUCCESS] Pipeline complete! The graph in Neo4j has been populated.")
 
 
 if __name__ == "__main__":

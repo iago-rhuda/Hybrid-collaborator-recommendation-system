@@ -17,7 +17,7 @@ class GraphQuerier:
     self.driver.close()
 
   def get_author_publications(self, author_name):
-    """Retorna todas as publicações de um autor específico."""
+    """Returns all publications by a specific author."""
     query = """
         MATCH (a:Author {name: $name})-[:WROTE]->(p:Publication)
         RETURN p.halId AS hal_id, p.title AS title, p.year AS year
@@ -27,7 +27,7 @@ class GraphQuerier:
       return [dict(record) for record in result]
 
   def get_collaborators_network(self, publication_title_fragment):
-    """Encontra coautores que trabalharam em publicações com um termo no título."""
+    """Find co-authors who have worked on publications with a term in the title."""
     query = """
         MATCH (p:Publication)<-[:WROTE]-(a:Author)
         WHERE p.title CONTAINS $fragment

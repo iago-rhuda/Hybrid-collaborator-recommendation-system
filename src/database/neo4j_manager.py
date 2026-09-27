@@ -18,7 +18,7 @@ class Neo4jManager:
     self.driver.close()
 
   def setup_constraints(self):
-    """Cria restrições de unicidade para evitar duplicatas no grafo."""
+    """It creates uniqueness constraints to prevent duplicates in the graph."""
     queries = [
         "CREATE CONSTRAINT publication_hal_id IF NOT EXISTS FOR (p:Publication) REQUIRE p.halId IS UNIQUE",
         "CREATE CONSTRAINT author_hal_id IF NOT EXISTS FOR (a:Author) REQUIRE a.authIdHal IS UNIQUE",
@@ -28,12 +28,11 @@ class Neo4jManager:
       for q in queries:
         session.run(q)
     print(
-        "[OK] Restrições de unicidade configuradas com sucesso no Neo4j (sem"
-        " duplicatas)."
+        "[OK] Uniqueness constraints successfully configured in Neo4j (no duplicates)."
     )
 
   def save_publication_data(self, doc_data, authors, labs):
-    """Salva a publicação, os autores, o laboratório e cria as arestas tipadas."""
+    """It saves the publication, the authors, the laboratory, and creates the typed edges."""
     query = """
         MERGE (p:Publication {halId: $hal_id})
         ON CREATE SET p.title = $title, p.year = $year, p.docType = $doc_type, p.abstract = $abstract
