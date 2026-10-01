@@ -12,7 +12,7 @@ class HalClient:
 
   def __init__(self):
     self.base_url = "https://api.archives-ouvertes.fr/search/utc/"
-    self.query = '("data science" OR "science de données")'
+    self.query = '*:*' # Fetches absolutely all records
     self.rows_per_page = 100
 
     self.fields = (
@@ -88,6 +88,6 @@ class HalClient:
 
     return all_docs
 
-  def fetch_data_science_publications(self):
-    """Creates an iterator/list with all publications of Data Science from the UTC."""
+  def fetch_all_publications(self):
+    """Creates an iterator/list with all publications from the UTC."""
     return self.fetch_publications()

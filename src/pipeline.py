@@ -14,7 +14,7 @@ def run_pipeline():
   db.setup_constraints()  # Ensures that duplicate restrictions are active.
 
   client = HalClient()
-  docs = client.fetch_data_science_publications()
+  docs = client.fetch_all_publications()
 
   print(f"\nProcessing and inserting {len(docs)} documents into Neo4j...")
 
