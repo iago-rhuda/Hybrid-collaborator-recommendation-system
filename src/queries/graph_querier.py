@@ -16,23 +16,27 @@ class GraphQuerier:
   def close(self):
     self.driver.close()
 
-  def get_author_publications(self, author_name):
-    """Returns all publications by a specific author."""
+  def get_author_projects(self, author_name):
+    """Returns all projects by a specific author."""
     query = """
-        MATCH (a:Author {name: $name})-[:WROTE]->(p:Publication)
-        RETURN p.halId AS hal_id, p.title AS title, p.year AS year
+        MATCH (a:Author {fullName: $name})-[:WROTE]->(p:Project)
+        RETURN p.halId AS hal_id, p.title AS title, p.publicationYear AS year
         """
     with self.driver.session() as session:
       result = session.run(query, name=author_name)
       return [dict(record) for record in result]
 
-  def get_collaborators_network(self, publication_title_fragment):
-    """Find co-authors who have worked on publications with a term in the title."""
+  def get_author_publications(self, author_name):
+    """Backward-compatible alias for older callers."""
+    return self.get_author_projects(author_name)
+
+  def get_collaborators_network(self, project_title_fragment):
+    """Find collaborators who have worked on projects with a term in the title."""
     query = """
-        MATCH (p:Publication)<-[:WROTE]-(a:Author)
+        MATCH (p:Project)<-[:WROTE]-(a:Author)
         WHERE p.title CONTAINS $fragment
-        RETURN p.title AS publication, collect(a.name) AS co_authors
+        RETURN p.title AS publication, collect(a.fullName) AS co_authors
         """
     with self.driver.session() as session:
-      result = session.run(query, fragment=publication_title_fragment)
+      result = session.run(query, fragment=project_title_fragment)
       return [dict(record) for record in result]

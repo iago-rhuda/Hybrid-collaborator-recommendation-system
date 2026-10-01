@@ -1,5 +1,12 @@
 from connectors.hal_client import HalClient
 from database.neo4j_manager import Neo4jManager
+from processing.transformer import (
+    extract_authors_from_hal_record,
+    extract_conference_from_hal_record,
+    extract_organizations_from_hal_record,
+    extract_project_from_hal_record,
+    extract_research_domains_from_hal_record,
+)
 
 
 def run_pipeline():
@@ -12,45 +19,28 @@ def run_pipeline():
   print(f"\nProcessing and inserting {len(docs)} documents into Neo4j...")
 
   for doc in docs:
-    hal_id = doc.get("halId_s", doc.get("docid", "Unknown"))
-    title = doc.get("title_s", ["Untitled"])[0]
-    year = doc.get("publicationDateY_i", doc.get("producedDate_s", 0))
-    doc_type = doc.get("docType_s", "Unknown")
-    abstract = doc.get("abstract_s", [""])[0]
-
-    # Lists extractions
-    auth_names = doc.get("authFullName_s", [])
-    auth_ids_hal = doc.get("authIdHal_s", [])
-    auth_ids_person = doc.get("authIdPerson_i", [])
-    labs = doc.get("labStructName_s", [])
-    if not labs:
-      labs = doc.get("structName_s", [])
-
-    # Formatting authors for Cypher
-    authors_list = []
-    for i, name in enumerate(auth_names):
-      h_id = (
-          str(auth_ids_hal[i])
-          if i < len(auth_ids_hal) and auth_ids_hal[i]
-          else f"unknown_{name}"
-      )
-      p_id = (
-          str(auth_ids_person[i]) if i < len(auth_ids_person) else "unknown"
-      )
-      authors_list.append(
-          {"name": name, "auth_id_hal": h_id, "person_id": p_id}
-      )
-
-    doc_data = {
-        "hal_id": hal_id,
-        "title": title,
-        "year": int(year) if str(year).isdigit() else 0,
-        "doc_type": doc_type,
-        "abstract": abstract,
-    }
+    project = extract_project_from_hal_record(doc)
+    project_data = project.to_neo4j_dict()
+    authors = extract_authors_from_hal_record(doc)
+    authors_data = [author.to_neo4j_dict() for author in authors]
+    conference = extract_conference_from_hal_record(doc)
+    conference_data = conference.to_neo4j_dict() if conference else None
+    domain_data = extract_research_domains_from_hal_record(doc).to_neo4j_dict()
+    organization_data = extract_organizations_from_hal_record(doc).to_neo4j_dict()
 
     # Saves to Neo4j (MERGE automatically avoids duplicates)
-    db.save_publication_data(doc_data, authors_list, labs)
+    db.save_project_data(
+        project=project_data,
+        authors=authors_data,
+        conference=conference_data,
+        research_domains=domain_data["research_domains"],
+        project_domain_relations=domain_data["project_domain_relations"],
+        domain_hierarchy_relations=domain_data["domain_hierarchy_relations"],
+        organizations=organization_data["organizations"],
+        organization_relationships=organization_data[
+            "organization_relationships"
+        ],
+    )
 
   db.close()
   print("\n[SUCCESS] Pipeline complete! The graph in Neo4j has been populated.")
