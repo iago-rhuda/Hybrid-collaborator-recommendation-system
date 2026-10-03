@@ -93,6 +93,6 @@ class HalClient:
 
     return all_docs
 
-  def fetch_data_science_publications(self):
-    """Creates an iterator/list with all publications of Data Science from the UTC."""
+  def fetch_all_publications(self):
+    """Creates an iterator/list with all publications from the UTC."""
     return self.fetch_publications()
