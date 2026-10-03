@@ -1,6 +1,9 @@
 import os
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 load_dotenv()
 
@@ -29,9 +32,7 @@ class Neo4jManager:
     with self.driver.session() as session:
       for q in queries:
         session.run(q)
-    print(
-        "[OK] Uniqueness constraints successfully configured in Neo4j (no duplicates)."
-    )
+    logger.info("Uniqueness constraints successfully configured in Neo4j (no duplicates).")
 
   def save_project_data(
       self,

@@ -7,6 +7,9 @@ from processing.transformer import (
     extract_project_from_hal_record,
     extract_research_domains_from_hal_record,
 )
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def run_pipeline():
@@ -16,7 +19,7 @@ def run_pipeline():
   client = HalClient()
   docs = client.fetch_data_science_publications()
 
-  print(f"\nProcessing and inserting {len(docs)} documents into Neo4j...")
+  logger.info(f"Processing and inserting {len(docs)} documents into Neo4j...")
 
   for doc in docs:
     project = extract_project_from_hal_record(doc)
@@ -43,7 +46,7 @@ def run_pipeline():
     )
 
   db.close()
-  print("\n[SUCCESS] Pipeline complete! The graph in Neo4j has been populated.")
+  logger.info("Pipeline complete! The graph in Neo4j has been populated successfully.")
 
 
 if __name__ == "__main__":

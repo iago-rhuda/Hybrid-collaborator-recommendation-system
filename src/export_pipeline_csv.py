@@ -10,6 +10,9 @@ from processing.transformer import (
     extract_project_from_hal_record,
     extract_research_domains_from_hal_record,
 )
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 
 CSV_SCHEMAS = {
@@ -273,9 +276,9 @@ def main():
       output_dir=args.output,
   )
 
-  print(f"Fetched {len(docs)} HAL publication(s).")
+  logger.info(f"Fetched {len(docs)} HAL publication(s).")
   for table_name, path in files.items():
-    print(f"{table_name}: {path}")
+    logger.info(f"{table_name}: {path}")
 
 
 if __name__ == "__main__":

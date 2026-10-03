@@ -2,6 +2,10 @@ import json
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
+from logger import get_logger
+
+logger = get_logger(__name__)
+
 try:
   import requests
 except ModuleNotFoundError:
@@ -12,7 +16,7 @@ class HalClient:
 
   def __init__(self):
     self.base_url = "https://api.archives-ouvertes.fr/search/utc/"
-    self.query = '("data science" OR "science de données")'
+    self.query = '*:*'
     self.rows_per_page = 100
 
     self.fields = (
@@ -42,6 +46,7 @@ class HalClient:
       return response.json()
 
     url = f"{self.base_url}?{urlencode(params)}"
+    logger.debug(f"Fetching URL: {url}")
     with urlopen(url, timeout=30) as response:
       return json.loads(response.read().decode("utf-8"))
 
@@ -52,7 +57,7 @@ class HalClient:
     query = query or self.query
     rows_per_page = rows_per_page or self.rows_per_page
 
-    print("Consulting the HAL's API for publications...")
+    logger.info("Consulting the HAL API for publications...")
 
     while True:
       rows = rows_per_page
@@ -75,7 +80,7 @@ class HalClient:
       docs = data["docs"]
 
       if start == 0:
-        print(f"Total of publications found in HAL: {num_found}")
+        logger.info(f"Total number of publications found in HAL: {num_found}")
 
       if not docs:
         break
