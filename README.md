@@ -1,8 +1,8 @@
 # Hybrid Collaborator Recommendation System
 
-Data engineering pipeline for collecting publication metadata from the HAL API, normalizing it into canonical domain models, and preparing it for insertion into a Neo4j knowledge graph.
+HAL publication ingestion pipeline that fetches records from the UTC HAL portal, transforms them into canonical Python models, exports normalized CSV tables, and can persist them to Neo4j.
 
-The project is still evolving. The current architectural rule is to keep these concerns separate:
+This README describes the current implemented repository state. The collaborator recommender is a future target; see [the current-vs-target status document](docs/CURRENT_STATE_VS_TARGET_STATE.md) and [the project spec](docs/PROJECT_SPEC.md) for the staged architecture. The current code separates:
 
 - raw data from external APIs;
 - data transformation and normalization;
@@ -43,7 +43,7 @@ src/
     orcid_client.py        # Placeholder for ORCID integration
   database/
     neo4j_manager.py       # Neo4j persistence
-  models/
+  models/                  # Canonical entity and extraction dataclasses
     author.py              # Canonical author model
     conference.py          # Canonical conference model
     organization.py        # Canonical organization model
@@ -53,7 +53,7 @@ src/
     transformer.py         # HAL -> canonical model transformations
   queries/
     graph_querier.py       # Graph queries
-  export_pipeline_csv.py   # Pipeline dry run exporting CSV files
+  export_pipeline_csv.py   # HAL-to-CSV validation/export CLI
   pipeline.py              # Neo4j ingestion pipeline
 
 tests/
@@ -61,6 +61,12 @@ tests/
   test_organization_transformer.py
   test_research_domain_transformer.py
 ```
+
+`src/capability/`, `src/graph/`, `src/rag/`, `src/recommender/`,
+`src/requirements/`, and `src/validation/` are reserved for future work and
+currently contain no implemented feature modules. `src/config.py` and
+`src/connectors/orcid_client.py` are empty placeholders. The models are in
+`src/models/` (not `src/graph/models/`).
 
 ## Installation
 
@@ -80,21 +86,22 @@ Example:
 
 ```env
 NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
-NEO4J_USERNAME=neo4j
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=your-password
-NEO4J_DATABASE=neo4j
-AURA_INSTANCEID=your-instance-id
-AURA_INSTANCENAME=your-instance-name
 ```
 
-Note: the current `Neo4jManager` reads `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`.
+`Neo4jManager` reads `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`, with
+local defaults of `bolt://localhost:7687`, `neo4j`, and `password`.
+`GraphQuerier` reads the same variables but has no defaults. Set all three
+explicitly when using either component. The pipeline writes data; run it only
+against the intended database.
 
 ## Canonical Models
 
 ### Project
 
-Represents the normalized HAL publication/document.
+Represents a normalized HAL publication/document. The code calls this entity
+`Project`; it is not a funded research project.
 
 Fields:
 
@@ -191,7 +198,7 @@ Main field groups:
 
 Before populating Neo4j, use the CSV exporter to inspect the generated instances.
 
-Run the default search with only one publication:
+Run the default HAL query with at most one publication:
 
 ```bash
 python3 src/export_pipeline_csv.py --rows 1 --output exports/pipeline_csv_test
@@ -231,12 +238,19 @@ After validating the CSV output and configuring `.env`, run:
 PYTHONPATH=src python3 src/pipeline.py
 ```
 
-The pipeline:
+The pipeline currently:
 
 1. Fetches publications from HAL.
 2. Normalizes metadata using `processing/transformer.py`.
 3. Creates Neo4j uniqueness constraints.
 4. Saves graph nodes and relationships.
+
+`HalClient` defaults to the HAL query `*:*` on the UTC portal. The CSV
+exporter defaults to one record, but `pipeline.py` fetches all matching
+records; it has no row limit or dry-run mode. Start with the CSV exporter
+when checking data. Existing graph properties are set with `ON CREATE SET`,
+so re-running ingestion does not refresh properties on nodes that already
+exist.
 
 ## Tests
 
@@ -257,7 +271,10 @@ Current tests cover:
 - research domain extraction;
 - research domain hierarchy;
 - organization extraction;
-- HAL parallel array alignment;
+- organization parallel-array alignment and sparse identifiers.
+
+There are no recommender, capability extraction, graph-adapter, or Dublin
+Core transformation tests because those features are not implemented.
 - deduplication by HAL identifier;
 - CSV pipeline export.
 

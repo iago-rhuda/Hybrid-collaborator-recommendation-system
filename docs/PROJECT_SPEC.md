@@ -1,7 +1,10 @@
 # PROJECT SPEC — Research-oriented, project-centric collaboration recommender
 
-Single source of truth for the project. Place at `docs/PROJECT_SPEC.md`.
-Companion file: `.github/copilot-instructions.md` (short persistent rules for Copilot). If they conflict, **this spec wins**.
+This document is the target-state architecture and roadmap. It is not a description of the live repository as it currently exists.
+
+For the current implementation status, see [CURRENT_STATE_VS_TARGET_STATE.md](CURRENT_STATE_VS_TARGET_STATE.md). For repo-wide rules and Copilot behavior, see `.github/copilot-instructions.md`.
+
+This spec is the single source of truth for the future system. If it conflicts with the current code, the future architecture is still the target, not the current reality.
 
 ---
 
