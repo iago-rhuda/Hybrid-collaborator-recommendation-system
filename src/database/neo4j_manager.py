@@ -7,9 +7,9 @@ logger = get_logger(__name__)
 
 load_dotenv()
 
-URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-USER = os.getenv("NEO4J_USER", "neo4j")
-PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+URI = os.getenv("NEO4J_URI")
+USER = os.getenv("NEO4J_USER")
+PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
 class Neo4jManager:

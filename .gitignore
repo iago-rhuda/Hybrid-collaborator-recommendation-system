@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Downloaded HAL snapshots and generated reports
+exports/
+reports/
+
