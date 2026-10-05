@@ -1,0 +1,38 @@
+{
+  "project_id": null,
+  "domain_ids": [
+    "info.info-ai",
+    "info.info-ir"
+  ],
+  "required_capabilities": [
+    {
+      "name": "Collaborative Filtering",
+      "importance": 0.95,
+      "source": "extracted",
+      "capability_id": "collaborative_filtering"
+    },
+    {
+      "name": "Graph Neural Networks",
+      "importance": 0.85,
+      "source": "extracted",
+      "capability_id": "graph_neural_networks"
+    },
+    {
+      "name": "Retrieval-Augmented Generation",
+      "importance": 0.8,
+      "source": "extracted",
+      "capability_id": "retrieval_augmented_generation"
+    },
+    {
+      "name": "explainable ranking models",
+      "importance": 0.525,
+      "source": "extracted",
+      "capability_id": null
+    }
+  ],
+  "goals": [
+    "Recommend research collaborators based on team skill complementarity",
+    "Generate traceable natural language explanations with citation graph evidence"
+  ],
+  "extraction_version": "req-v1"
+}

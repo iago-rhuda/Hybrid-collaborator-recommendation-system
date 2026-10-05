@@ -1,0 +1,74 @@
+# Capability extraction and aggregation configuration
+
+extraction:
+  # Extraction run versions
+  current_version: "capability-v1"
+  prompt_version: "prompt-v1"
+
+  # Minimum confidence to accept an extracted capability
+  min_confidence: 0.5
+
+  # Maximum capabilities extracted per project
+  max_per_project: 20
+
+  # Disk cache directory for LLM outputs (relative to project root)
+  cache_dir: "data/llm_cache"
+
+  # Generic terms to reject unless they appear with domain-specific modifiers.
+  # Lowercase; comparison is done after normalization.
+  stoplist:
+    - research
+    - study
+    - analysis
+    - results
+    - data
+    - method
+    - approach
+    - work
+    - paper
+    - article
+    - project
+    - system
+    - framework
+    - model
+    - technique
+    - experiment
+    - evaluation
+    - performance
+    - review
+    - survey
+    - application
+    - science
+    - engineering
+    - technology
+    - information
+    - computing
+    - software
+    - hardware
+    - algorithm
+    - process
+    - solution
+    - problem
+    - implementation
+    - development
+    - design
+
+resolution:
+  # Embedding similarity threshold for merging variants (requires Embedder)
+  embedding_similarity_threshold: 0.92
+
+  # Require embedding similarity this high before merging abbreviations
+  abbreviation_similarity_threshold: 0.97
+
+aggregation:
+  # Minimum number of publication evidence items for a HAS_CAPABILITY relationship
+  min_evidence_count: 2
+
+  # Aggregation run version
+  current_version: "agg-v1"
+
+  # Recency half-life in years: a publication this many years old is weighted at 0.5
+  recency_half_life_years: 5
+
+  # Skip authors whose halId starts with this prefix (placeholder authors)
+  skip_prefix: "unknown_"

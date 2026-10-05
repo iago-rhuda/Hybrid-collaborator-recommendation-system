@@ -1,0 +1,298 @@
+[
+  {
+    "project_id": "hal-001",
+    "domain_ids": ["info.info-ai", "info.info-cl", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "transformer_architecture",
+        "name": "Transformer Architecture",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "natural_language_processing",
+        "name": "Natural Language Processing",
+        "importance": 0.8,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "multilingual text processing",
+        "importance": 0.6,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Improve multilingual named entity recognition",
+      "Adapt transformer models for low-resource languages"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-003",
+    "domain_ids": ["info.info-cr", "info.info-ai", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "federated_learning",
+        "name": "Federated Learning",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "differential_privacy",
+        "name": "Differential Privacy",
+        "importance": 0.85,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "privacy-utility trade-off analysis",
+        "importance": 0.65,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Train models across distributed clients without sharing raw data",
+      "Quantify the privacy-utility trade-off under varying epsilon values"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-005",
+    "domain_ids": ["info.info-ai", "sdv.msp", "info", "sdv"],
+    "required_capabilities": [
+      {
+        "capability_id": "formal_verification",
+        "name": "Formal Verification",
+        "importance": 0.5,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "SHAP value computation",
+        "importance": 0.8,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "clinical decision support integration",
+        "importance": 0.75,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "transformer_architecture",
+        "name": "Transformer Architecture",
+        "importance": 0.7,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Provide interpretable predictions for clinicians",
+      "Validate model explanations against clinical ground truth"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-009",
+    "domain_ids": ["info.info-ma", "info.info-ai", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "reinforcement_learning",
+        "name": "Reinforcement Learning",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "multi-agent coordination",
+        "importance": 0.85,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "energy demand forecasting",
+        "importance": 0.6,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Coordinate distributed energy resources in real time",
+      "Minimize peak demand while satisfying user constraints"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-025",
+    "domain_ids": ["info.info-ai", "info.info-cr", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "adversarial_robustness",
+        "name": "Adversarial Robustness",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "certified defense",
+        "importance": 0.8,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "federated_learning",
+        "name": "Federated Learning",
+        "importance": 0.5,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Prove robustness guarantees against l_inf perturbations",
+      "Benchmark certified defenses on CIFAR and ImageNet"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-006",
+    "domain_ids": ["phys.qphy", "info.info-dc", "phys", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "quantum_computing",
+        "name": "Quantum Computing",
+        "importance": 0.95,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "variational circuit design",
+        "importance": 0.8,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "NISQ hardware benchmarking",
+        "importance": 0.7,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Solve NP-hard combinatorial optimization on current quantum hardware",
+      "Compare QAOA depth vs classical approximation ratio"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-017",
+    "domain_ids": ["info.info-cr", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "blockchain",
+        "name": "Blockchain",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "secure_multi_party_computation",
+        "name": "Secure Multi-Party Computation",
+        "importance": 0.6,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "smart contract auditing",
+        "importance": 0.75,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Enable end-to-end traceability without centralising sensitive data",
+      "Detect counterfeit drugs via immutable ledger records"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-018",
+    "domain_ids": ["info.info-ai", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "self_supervised_learning",
+        "name": "Self-Supervised Learning",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "contrastive learning objectives",
+        "importance": 0.8,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "anomaly_detection",
+        "name": "Anomaly Detection",
+        "importance": 0.6,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Learn transferable features from unlabeled sensor streams",
+      "Reduce annotation cost for downstream classification tasks"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-029",
+    "domain_ids": ["info.info-ai", "info.info-db", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "knowledge_graph",
+        "name": "Knowledge Graph",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "SPARQL query optimization",
+        "importance": 0.75,
+        "source": "extracted"
+      },
+      {
+        "capability_id": "graph_neural_network",
+        "name": "Graph Neural Network",
+        "importance": 0.65,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Enrich article metadata with ontological relations",
+      "Improve recommendation diversity using semantic distance"
+    ],
+    "extraction_version": "prompt-v1"
+  },
+  {
+    "project_id": "hal-022",
+    "domain_ids": ["info.info-cv", "info.info-ai", "sdv", "info"],
+    "required_capabilities": [
+      {
+        "capability_id": "semantic_segmentation",
+        "name": "Semantic Segmentation",
+        "importance": 0.9,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "active learning query strategy",
+        "importance": 0.85,
+        "source": "extracted"
+      },
+      {
+        "capability_id": null,
+        "name": "biomedical image annotation",
+        "importance": 0.7,
+        "source": "extracted"
+      }
+    ],
+    "goals": [
+      "Segment cell nuclei in fluorescence microscopy with minimal labels",
+      "Develop query strategies that outperform random sampling"
+    ],
+    "extraction_version": "prompt-v1"
+  }
+]

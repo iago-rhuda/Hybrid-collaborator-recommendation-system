@@ -1,0 +1,553 @@
+[
+  {
+    "project_id": "hal-001",
+    "title": "Deep Learning for Natural Language Processing",
+    "abstract": "We present a transformer-based approach for multilingual NLP tasks including named entity recognition and machine translation.",
+    "keywords": ["deep learning", "transformer", "NLP", "machine translation", "named entity recognition"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "bob-martin", "full_name": "Bob Martin"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-002",
+    "title": "Graph Neural Networks for Knowledge Graph Completion",
+    "abstract": "This paper proposes a GNN-based model for link prediction and entity alignment in large-scale knowledge graphs.",
+    "keywords": ["graph neural network", "knowledge graph", "link prediction", "entity alignment"],
+    "year": 2023,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info.info-db", "name": "Databases", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-003",
+    "title": "Federated Learning with Differential Privacy",
+    "abstract": "We study the trade-off between privacy and utility in federated learning using differential privacy mechanisms.",
+    "keywords": ["federated learning", "differential privacy", "distributed machine learning"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "bob-martin", "full_name": "Bob Martin"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cr", "name": "Cryptography and Security", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-004",
+    "title": "Autonomous Robotics with Reinforcement Learning",
+    "abstract": "A deep reinforcement learning framework for autonomous robot navigation in unstructured environments.",
+    "keywords": ["reinforcement learning", "robotics", "autonomous navigation", "deep learning"],
+    "year": 2021,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "elena-rousseau", "full_name": "Elena Rousseau"},
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ro", "name": "Robotics", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-005",
+    "title": "Explainable AI for Medical Diagnosis",
+    "abstract": "We develop interpretable machine learning models for clinical decision support, focusing on attention mechanisms and SHAP values.",
+    "keywords": ["explainable AI", "medical diagnosis", "SHAP", "attention mechanism", "clinical decision support"],
+    "year": 2023,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "frank-weber", "full_name": "Frank Weber"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "sdv.msp", "name": "Medical Physics", "parent_ids": ["sdv"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []},
+      {"domain_id": "sdv", "name": "Life Sciences", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-006",
+    "title": "Quantum Computing for Optimization Problems",
+    "abstract": "We implement variational quantum eigensolvers and QAOA circuits for combinatorial optimization on NISQ hardware.",
+    "keywords": ["quantum computing", "QAOA", "variational quantum eigensolver", "combinatorial optimization"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"},
+      {"person_id": "frank-weber", "full_name": "Frank Weber"}
+    ],
+    "domains": [
+      {"domain_id": "phys.qphy", "name": "Quantum Physics", "parent_ids": ["phys"]},
+      {"domain_id": "info.info-dc", "name": "Distributed Computing", "parent_ids": ["info"]},
+      {"domain_id": "phys", "name": "Physics", "parent_ids": []},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-007",
+    "title": "Large Language Models for Code Generation",
+    "abstract": "We fine-tune large language models on code corpora to generate, complete and refactor source code across multiple programming languages.",
+    "keywords": ["large language model", "code generation", "program synthesis", "fine-tuning"],
+    "year": 2023,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-pl", "name": "Programming Languages", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-008",
+    "title": "Bayesian Optimization for Hyperparameter Tuning",
+    "abstract": "A Gaussian process-based Bayesian optimization framework for automated machine learning hyperparameter search.",
+    "keywords": ["Bayesian optimization", "Gaussian process", "hyperparameter tuning", "AutoML"],
+    "year": 2021,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"},
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "math.math-st", "name": "Statistics", "parent_ids": ["math"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []},
+      {"domain_id": "math", "name": "Mathematics", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-009",
+    "title": "Multi-Agent Systems for Smart Grid Management",
+    "abstract": "We apply multi-agent reinforcement learning to balance energy supply and demand in decentralized smart grid environments.",
+    "keywords": ["multi-agent system", "smart grid", "reinforcement learning", "energy management"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "elena-rousseau", "full_name": "Elena Rousseau"},
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"},
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ma", "name": "Multiagent Systems", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-010",
+    "title": "Convolutional Neural Networks for Remote Sensing",
+    "abstract": "We apply CNNs for semantic segmentation of satellite imagery for land use and urban change detection.",
+    "keywords": ["convolutional neural network", "remote sensing", "semantic segmentation", "satellite imagery"],
+    "year": 2021,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"},
+      {"person_id": "bob-martin", "full_name": "Bob Martin"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-011",
+    "title": "Formal Verification of Neural Networks",
+    "abstract": "We employ satisfiability modulo theories (SMT) solvers to verify safety properties of neural network classifiers.",
+    "keywords": ["formal verification", "neural network", "SMT solver", "safety properties"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "frank-weber", "full_name": "Frank Weber"},
+      {"person_id": "jana-novak", "full_name": "Jana Novak"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-lo", "name": "Logic in Computer Science", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-012",
+    "title": "Continual Learning under Distribution Shift",
+    "abstract": "A benchmark and method for preventing catastrophic forgetting in neural networks when trained on non-stationary data streams.",
+    "keywords": ["continual learning", "catastrophic forgetting", "distribution shift", "lifelong learning"],
+    "year": 2023,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "jana-novak", "full_name": "Jana Novak"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-013",
+    "title": "Anomaly Detection in Industrial IoT",
+    "abstract": "Time-series anomaly detection using autoencoders and isolation forests for predictive maintenance in manufacturing.",
+    "keywords": ["anomaly detection", "IoT", "autoencoder", "isolation forest", "predictive maintenance"],
+    "year": 2022,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"},
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ni", "name": "Networking and Internet Architecture", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-014",
+    "title": "Multimodal Learning from Text and Images",
+    "abstract": "We introduce a cross-modal attention architecture for joint learning from text and image data in visual question answering tasks.",
+    "keywords": ["multimodal learning", "visual question answering", "cross-modal attention", "vision-language"],
+    "year": 2023,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"},
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-015",
+    "title": "Causal Inference for Observational Studies",
+    "abstract": "We apply causal discovery algorithms and do-calculus to estimate treatment effects from observational healthcare data.",
+    "keywords": ["causal inference", "causal discovery", "do-calculus", "observational study", "treatment effect"],
+    "year": 2021,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"},
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"}
+    ],
+    "domains": [
+      {"domain_id": "math.math-st", "name": "Statistics", "parent_ids": ["math"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "math", "name": "Mathematics", "parent_ids": []},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-016",
+    "title": "Speech Recognition in Noisy Environments",
+    "abstract": "A noise-robust ASR system based on conformer architectures with environmental noise augmentation.",
+    "keywords": ["speech recognition", "ASR", "conformer", "noise robustness", "audio augmentation"],
+    "year": 2022,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"},
+      {"person_id": "jana-novak", "full_name": "Jana Novak"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-sd", "name": "Sound", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-017",
+    "title": "Blockchain-based Supply Chain Traceability",
+    "abstract": "A permissioned blockchain protocol with smart contracts for end-to-end traceability in pharmaceutical supply chains.",
+    "keywords": ["blockchain", "smart contract", "supply chain", "traceability", "permissioned ledger"],
+    "year": 2021,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"},
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cr", "name": "Cryptography and Security", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-018",
+    "title": "Self-Supervised Representation Learning for Time Series",
+    "abstract": "Contrastive and predictive self-supervised objectives for learning transferable representations from unlabeled time-series data.",
+    "keywords": ["self-supervised learning", "contrastive learning", "time series", "representation learning"],
+    "year": 2023,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"},
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"},
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-019",
+    "title": "Transfer Learning for Low-Resource NLP",
+    "abstract": "Cross-lingual transfer and few-shot adaptation of pre-trained language models for low-resource languages.",
+    "keywords": ["transfer learning", "low-resource NLP", "cross-lingual", "few-shot learning", "pre-trained model"],
+    "year": 2022,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "jana-novak", "full_name": "Jana Novak"},
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cl", "name": "Computation and Language", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-020",
+    "title": "Secure Multi-Party Computation for Privacy-Preserving ML",
+    "abstract": "We implement garbled circuits and secret sharing schemes to train linear models without revealing private training data.",
+    "keywords": ["secure multi-party computation", "garbled circuit", "secret sharing", "privacy-preserving machine learning"],
+    "year": 2021,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"},
+      {"person_id": "frank-weber", "full_name": "Frank Weber"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cr", "name": "Cryptography and Security", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-021",
+    "title": "Optical Character Recognition with Attention",
+    "abstract": "An end-to-end OCR pipeline using CNN-RNN architectures with attention for document image understanding.",
+    "keywords": ["OCR", "document image", "attention mechanism", "CNN", "RNN"],
+    "year": 2020,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"},
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-022",
+    "title": "Active Learning for Biomedical Image Segmentation",
+    "abstract": "Query strategies for efficient annotation selection in microscopy image segmentation with limited labeled data.",
+    "keywords": ["active learning", "biomedical imaging", "image segmentation", "annotation efficiency"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "frank-weber", "full_name": "Frank Weber"},
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "sdv", "name": "Life Sciences", "parent_ids": []},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-023",
+    "title": "Neural Machine Translation with Back-Translation",
+    "abstract": "Data augmentation via back-translation for low-resource neural machine translation with pre-trained multilingual encoders.",
+    "keywords": ["machine translation", "back-translation", "data augmentation", "multilingual encoder"],
+    "year": 2021,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "bob-martin", "full_name": "Bob Martin"},
+      {"person_id": "jana-novak", "full_name": "Jana Novak"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cl", "name": "Computation and Language", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-024",
+    "title": "Sparse Autoencoders for Interpretable Representations",
+    "abstract": "We train sparse autoencoders with L1 regularization to produce interpretable latent representations for tabular data.",
+    "keywords": ["sparse autoencoder", "interpretability", "L1 regularization", "latent representation", "tabular data"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"},
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-025",
+    "title": "Adversarial Robustness of Deep Neural Networks",
+    "abstract": "We analyze adversarial attacks and certified defenses including randomized smoothing for image classifiers.",
+    "keywords": ["adversarial robustness", "adversarial attack", "randomized smoothing", "certified defense"],
+    "year": 2023,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "alice-dupont", "full_name": "Alice Dupont"},
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info.info-cr", "name": "Cryptography and Security", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-026",
+    "title": "Real-Time Object Detection for Autonomous Driving",
+    "abstract": "Optimized YOLO variants and anchor-free detection heads for real-time 2D and 3D object detection on embedded hardware.",
+    "keywords": ["object detection", "YOLO", "autonomous driving", "embedded hardware", "3D detection"],
+    "year": 2022,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "elena-rousseau", "full_name": "Elena Rousseau"},
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ro", "name": "Robotics", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-027",
+    "title": "Probabilistic Planning under Uncertainty",
+    "abstract": "POMDP formulations and point-based solvers for robot task planning under sensory and actuation uncertainty.",
+    "keywords": ["POMDP", "probabilistic planning", "uncertainty", "task planning", "point-based solver"],
+    "year": 2020,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "elena-rousseau", "full_name": "Elena Rousseau"},
+      {"person_id": "bob-martin", "full_name": "Bob Martin"},
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ro", "name": "Robotics", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-028",
+    "title": "Data Poisoning Attacks on Federated Learning",
+    "abstract": "We study backdoor and Byzantine attacks on federated learning and propose gradient norm clipping defenses.",
+    "keywords": ["data poisoning", "federated learning", "backdoor attack", "Byzantine fault", "gradient clipping"],
+    "year": 2021,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "diana-chen", "full_name": "Diana Chen"},
+      {"person_id": "frank-weber", "full_name": "Frank Weber"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cr", "name": "Cryptography and Security", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-029",
+    "title": "Semantic Web and Ontology-based Recommendation",
+    "abstract": "An ontology-driven collaborative filtering system using SPARQL queries and RDF knowledge graphs for research article recommendation.",
+    "keywords": ["semantic web", "ontology", "collaborative filtering", "SPARQL", "knowledge graph"],
+    "year": 2020,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"},
+      {"person_id": "jana-novak", "full_name": "Jana Novak"},
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info.info-db", "name": "Databases", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-030",
+    "title": "Curriculum Learning for Efficient Neural Training",
+    "abstract": "We propose difficulty-aware curriculum schedules that improve training efficiency and generalization on image classification benchmarks.",
+    "keywords": ["curriculum learning", "training efficiency", "difficulty estimation", "generalization"],
+    "year": 2021,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "carlos-silva", "full_name": "Carlos Silva"},
+      {"person_id": "leo-schmidt", "full_name": "Leo Schmidt"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-031",
+    "title": "Meta-Learning for Fast Adaptation",
+    "abstract": "Model-agnostic meta-learning (MAML) and Prototypical Networks for rapid adaptation to new tasks with few examples.",
+    "keywords": ["meta-learning", "MAML", "prototypical network", "few-shot learning", "fast adaptation"],
+    "year": 2022,
+    "doc_type": "ART",
+    "members": [
+      {"person_id": "iris-papadopoulos", "full_name": "Iris Papadopoulos"},
+      {"person_id": "karen-tanaka", "full_name": "Karen Tanaka"},
+      {"person_id": "gina-okonkwo", "full_name": "Gina Okonkwo"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-ai", "name": "Artificial Intelligence", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  },
+  {
+    "project_id": "hal-032",
+    "title": "Point Cloud Processing with PointNet",
+    "abstract": "Deep learning on raw 3D point clouds for object classification and part segmentation using PointNet and PointNet++ architectures.",
+    "keywords": ["point cloud", "PointNet", "3D deep learning", "object classification", "part segmentation"],
+    "year": 2023,
+    "doc_type": "COMM",
+    "members": [
+      {"person_id": "elena-rousseau", "full_name": "Elena Rousseau"},
+      {"person_id": "henry-leroy", "full_name": "Henry Leroy"}
+    ],
+    "domains": [
+      {"domain_id": "info.info-cv", "name": "Computer Vision", "parent_ids": ["info"]},
+      {"domain_id": "info.info-ro", "name": "Robotics", "parent_ids": ["info"]},
+      {"domain_id": "info", "name": "Computer Science", "parent_ids": []}
+    ]
+  }
+]

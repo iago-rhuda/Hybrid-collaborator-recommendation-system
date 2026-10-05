@@ -77,13 +77,14 @@ While waiting (B on Days 1–2, C on Days 1–4): onboarding only — read the s
 5. Requirements extraction (`ProjectSpec` or `halId` -> `ProjectRequirements`, mapped to domains/capabilities, JSON cache, domain-only fallback on LLM failure).
 6. `Neo4jAdapter.get_person_capabilities` and `FakeAdapter` capability fixtures.
 
-**Gate 2 -> C**
-- [ ] `unittest` green without LLM key or Neo4j (fake LLM, fake adapter).
-- [ ] Dev DB contains capabilities v1 with provenance; manual review of ~30 projects recorded in `docs/capability_semantics.md` (precision notes, stoplist tuning).
-- [ ] v1 and v2 coexist (test).
-- [ ] `tests/fixtures/capabilities.json` and `tests/fixtures/requirements.json` committed (>= 10 projects each).
-- [ ] 3 example `ProjectRequirements` JSON files in `data/requirements/examples/`.
-- [ ] Cost/time note: how to run the full extraction and how long it took on the dev subset.
+**Gate 2 -> C (COMPLETED)**
+- [x] `unittest` green without LLM key or Neo4j (fake LLM, fake adapter).
+- [x] Dev DB contains capabilities v1 with provenance; manual review of ~30 projects recorded in `docs/capability_semantics.md` (precision notes, stoplist tuning).
+- [x] v1 and v2 coexist (test).
+- [x] `tests/fixtures/capabilities.json` and `tests/fixtures/requirements.json` committed (>= 10 projects each).
+- [x] 3 example `ProjectRequirements` JSON files in `data/requirements/examples/`.
+- [x] Cost/time note: how to run the full extraction and how long it took on the dev subset.
+
 
 **Handoff pack:** merged PR, fixtures, examples, capability docs, instructions to run the full extraction (C launches it in the background on Day 5).
 
