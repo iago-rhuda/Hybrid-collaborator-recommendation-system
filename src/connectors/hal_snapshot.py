@@ -23,6 +23,46 @@ def _get_requested_fields(client: Any) -> list[str]:
   return []
 
 
+def _normalize_author_fields(
+    doc: dict[str, Any],
+    requested_fields: list[str],
+) -> dict[str, Any]:
+  author_fields = {
+      field
+      for field in requested_fields
+      if field.startswith("auth")
+  } | {
+      field
+      for field in doc
+      if field.startswith("auth")
+  }
+  if not author_fields:
+    return doc
+
+  author_values = {}
+  for field in author_fields:
+    value = doc.get(field)
+    if value is None:
+      values = []
+    elif isinstance(value, list):
+      values = value
+    else:
+      values = [value]
+    author_values[field] = values
+
+  names = author_values.get("authFullName_s")
+  author_count = (
+      len(names)
+      if names
+      else max((len(values) for values in author_values.values()), default=0)
+  )
+
+  normalized = dict(doc)
+  for field, values in author_values.items():
+    normalized[field] = (values + [0] * author_count)[:author_count]
+  return normalized
+
+
 def _extract_response(response: Any) -> dict[str, Any]:
   if not isinstance(response, dict):
     raise ValueError(
@@ -106,16 +146,21 @@ def create_hal_snapshot(
   snapshot_dir = output_dir / f"hal_snapshot_{timestamp}"
   snapshot_dir.mkdir(parents=True, exist_ok=True)
 
+  requested_fields = _get_requested_fields(client)
   jsonl_path = snapshot_dir / "records.jsonl"
   with jsonl_path.open("w", encoding="utf-8") as jsonl_file:
     for doc in docs:
       jsonl_file.write(
-          json.dumps(doc, ensure_ascii=False, sort_keys=True) + "\n"
+          json.dumps(
+              _normalize_author_fields(doc, requested_fields),
+              ensure_ascii=False,
+              sort_keys=True,
+          ) + "\n"
       )
 
   manifest = _build_manifest(
       query=query,
-      requested_fields=_get_requested_fields(client),
+      requested_fields=requested_fields,
       sort=sort,
       num_found=num_found,
       fetched_count=len(docs),

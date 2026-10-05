@@ -252,6 +252,38 @@ when checking data. Existing graph properties are set with `ON CREATE SET`,
 so re-running ingestion does not refresh properties on nodes that already
 exist.
 
+### Validate an author-identity change on a dev subset
+
+The author extractor now repairs only uniquely name-matched cross-position
+HAL IDs and uses `authIdPerson_i` before the name-based fallback. To exercise
+the changed path without fetching or ingesting the whole corpus, provide a
+snapshot, an explicit limit of at most 2,000 records, and a dedicated,
+isolated Neo4j dev database:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+& .\.venv\Scripts\python.exe src\pipeline.py `
+  --snapshot exports\hal_snapshot\hal_snapshot_20261005T191317Z\records.jsonl `
+  --limit 1000 `
+  --database author_identity_dev
+```
+
+The snapshot is ordered by `halId_s`; the first 1,000 records make this a
+repeatable integration smoke test of the transformer and graph writes. Unit
+tests separately exercise the confirmed shift, fallback, and ambiguous-match
+cases. This bounded subset is sufficient to catch failures in those changed
+paths and the persistence call, but it is not a new full-corpus quality
+estimate. Run only against a dev database, not the shared or production
+database.
+
+Neo4j writes use `MERGE` and `ON CREATE SET`; re-ingestion does not remove old
+author-to-project relationships or refresh existing author properties. A
+full-data rollout therefore requires a separately reviewed migration or
+rebuild strategy for previously persisted author identities, followed by
+re-ingestion of the complete snapshot and full integrity/data-quality checks.
+Do not treat a successful 1,000-record dev run as authorization for that
+full-data operation.
+
 ## Check Neo4j integrity
 
 Run the read-only integrity checks after configuring the `.env` Neo4j
@@ -289,6 +321,10 @@ so they cannot silently alter the taxonomy's meaning.
 Build date-stamped Markdown and JSON reports from a HAL snapshot. The HAL
 validation runs automatically; previously generated ETL, hierarchy, and
 Neo4j integrity JSON results can be included as optional inputs:
+
+Snapshot records pad requested or present `auth*` arrays to the author count,
+using numeric `0` where a corresponding author value is missing. Reports treat
+that author-ID placeholder as missing.
 
 ```powershell
 $env:PYTHONPATH = "$PWD\src"

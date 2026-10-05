@@ -8,6 +8,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from processing.transformer import extract_authors_from_hal_record
 from validation.hal_validator import validate_hal_documents
 
 
@@ -55,6 +56,10 @@ def _is_present(value: Any) -> bool:
   return bool(str(value).strip())
 
 
+def _is_present_author_hal_id(value: Any) -> bool:
+  return _is_present(value) and str(value).strip() != "0"
+
+
 def _field_present(doc: dict, fields: tuple[str, ...]) -> bool:
   return any(_is_present(doc.get(field)) for field in fields)
 
@@ -81,13 +86,10 @@ def _author_ids_and_names(docs: list[dict]) -> tuple[set[str], int, dict[str, se
   name_to_ids: dict[str, set[str]] = defaultdict(set)
   for doc in docs:
     names = _as_list(doc.get("authFullName_s"))
-    ids = _as_list(doc.get("authIdHal_s"))
-    for index, name_value in enumerate(names):
+    authors = extract_authors_from_hal_record(doc)
+    for name_value, author in zip(names, authors):
       name = str(name_value or "").strip()
-      hal_id = ids[index] if index < len(ids) else None
-      if not _is_present(hal_id):
-        hal_id = f"unknown_{name or index}"
-      author_id = str(hal_id).strip()
+      author_id = author.hal_id
       author_ids.add(author_id)
       if author_id.startswith("unknown_"):
         unknown_author_count += 1
@@ -194,7 +196,7 @@ def _analyze_raw_docs(docs: list[dict], manifest: dict | None) -> dict:
       1
       for doc in docs
       for index, name in enumerate(_as_list(doc.get("authFullName_s")))
-      if not _is_present(
+      if not _is_present_author_hal_id(
           _as_list(doc.get("authIdHal_s"))[index]
           if index < len(_as_list(doc.get("authIdHal_s")))
           else None

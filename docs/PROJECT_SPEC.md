@@ -32,7 +32,7 @@ There is **no** Author->Organization edge (HAL `struct*` fields are record-level
 | Term | Meaning in this repo |
 |---|---|
 | Project | A **HAL publication/document** (`Project.halId`), not a funded research project |
-| Person / person_id | `Author` / `Author.halId` (IdHal, or `unknown_<name>` fallback) |
+| Person / person_id | `Author` / `Author.halId` (IdHal, then `person_<authIdPerson_i>`, then `unknown_<name>`) |
 | Target project | An existing `Project.halId` **or** a free-text `ProjectSpec(title, abstract, keywords)` |
 | Project members | Authors linked by `WROTE` |
 
@@ -40,7 +40,7 @@ There is **no** Author->Organization edge (HAL `struct*` fields are record-level
 | Assumption | Reality | Resolution |
 |---|---|---|
 | "Project" is a research project | It is a publication | Definitions above; evaluation by leave-one-author-out |
-| Author identity is reliable | IdHal or `unknown_<name>`; arrays read by position, no length guard (orgs have one); homonyms merge | Measure in Phase 1; decision D2 |
+| Author identity is reliable | HAL IdHal values can be positionally shifted even when padded arrays have equal lengths. The transformer realigns only uniquely name-matched IDs when a cross-position match confirms a shift; missing IDs fall back to `person_<authIdPerson_i>`, then `unknown_<name>`. Ambiguous IDs are not inferred. | Phase 1 measured cross-position matches in 44.5% of snapshot records; apply the narrow correction in D2 and verify on a dev subset before re-ingesting. |
 | Author AFFILIATED_WITH Organization | Not in graph; orgs link only to Project | Not used. Possible later ETL change using HAL author–structure field |
 | Raw snapshots | None | New `connectors/hal_snapshot.py` wrapper writing JSONL |
 | Stable pagination | `start/rows`, no `sort`, no retry, `["response"]` assumed | Snapshot twice and diff; if unstable/truncated add `sort=docid asc` and/or `cursorMark` (smallest change) |
@@ -59,9 +59,9 @@ There is **no** Author->Organization edge (HAL `struct*` fields are record-level
 
 ## 3. Decisions to take at kickoff (record in `docs/DECISIONS.md`)
 - **D1** Project = publication. Target input = `halId` or `ProjectSpec`. Evaluation: leave-one-author-out on projects with >= 3 authors (hit@k is a sanity check, not ground truth).
-- **D2** Author identity. Default: no key change unless Phase 1 shows misalignment/homonym rate above a threshold (e.g. 2% of records). If fixed: length-guarded parallel arrays like organizations; id fallback IdHal -> `person_<authIdPerson_i>` -> `unknown_<name>`; re-ingest dev subset. Owner: Member A.
+- **D2** Author identity. Phase 1 found uniquely name-matched cross-position IdHal values in 44.5% of snapshot records, so the transformer now reassigns only those unambiguous IdHal values when a shift is confirmed. Missing or withheld IdHal values fall back to `person_<authIdPerson_i>`, then `unknown_<name>`. The graph schema is unchanged, but affected fallback keys change. Validate the fix with regression tests and a repeatable, bounded snapshot import into an isolated dev database (1,000 records; maximum 2,000). This is integration smoke coverage, not full-corpus certification. A full rollout requires a reviewed migration/rebuild plan for existing identities and relationships, then full-snapshot ingestion and integrity/data-quality checks.
 - **D3** LLM and embedding providers via env vars behind interfaces; disk cache of LLM calls.
-- **D4** Develop on a dev subset (500–2000 projects, one snapshot file) in a separate Neo4j database; run on full data only at Day 6–7.
+- **D4** Develop on a dev subset (500–2000 projects, one snapshot file) in a separate Neo4j database; run on full data only at Day 6–7. The pipeline's snapshot mode requires explicit `--limit` and `--database` arguments and caps the import at 2,000 records.
 - **D5** Requirements cached as JSON (`data/requirements/`), not written to Neo4j this week.
 - **D6** Branch per member, PR per phase, adapter contract changes announced first.
 

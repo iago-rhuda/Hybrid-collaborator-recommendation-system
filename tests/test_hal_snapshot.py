@@ -79,6 +79,48 @@ class HalSnapshotTest(unittest.TestCase):
       self.assertEqual(client.last_params["sort"], "halId_s asc")
       self.assertEqual(client.sort, "halId_s asc")
 
+  def test_pads_author_fields_to_match_author_count(self):
+    client = FakeHalClient()
+    client.fields = (
+        "authFullName_s,authIdHal_s,authIdPerson_i,"
+        "authFirstName_s,authLastName_s,authORCIDIdExt_s"
+    )
+    doc = {
+        "halId_s": "hal-authors",
+        "authFullName_s": ["Ada Lovelace", "Grace Hopper", "Katherine Johnson"],
+        "authIdHal_s": ["ada", "grace"],
+        "authIdPerson_i": [42],
+        "authFirstName_s": ["Ada", "Grace", "Katherine"],
+        "authLastName_s": ["Lovelace"],
+    }
+    client._response["response"]["docs"] = [doc]
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+      result = create_hal_snapshot(
+          output_dir=Path(temp_dir),
+          client=client,
+      )
+
+      with result["jsonl_path"].open("r", encoding="utf-8") as jsonl_file:
+        record = json.loads(jsonl_file.readline())
+
+    expected_author_fields = [
+        "authFullName_s",
+        "authIdHal_s",
+        "authIdPerson_i",
+        "authFirstName_s",
+        "authLastName_s",
+        "authORCIDIdExt_s",
+    ]
+    self.assertTrue(
+        all(len(record[field]) == 3 for field in expected_author_fields)
+    )
+    self.assertEqual(record["authIdHal_s"], ["ada", "grace", 0])
+    self.assertEqual(record["authIdPerson_i"], [42, 0, 0])
+    self.assertEqual(record["authLastName_s"], ["Lovelace", 0, 0])
+    self.assertEqual(record["authORCIDIdExt_s"], [0, 0, 0])
+    self.assertEqual(doc["authIdHal_s"], ["ada", "grace"])
+
 
 if __name__ == "__main__":
   unittest.main()

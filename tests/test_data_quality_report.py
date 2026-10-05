@@ -133,6 +133,44 @@ class DataQualityReportTest(unittest.TestCase):
     with self.assertRaises(TypeError):
       build_data_quality_report([{"halId_s": "ok"}, "not-a-document"])
 
+  def test_treats_zero_padded_author_ids_as_missing(self):
+    report = build_data_quality_report([{
+        "halId_s": "hal-padded-authors",
+        "authFullName_s": ["Ada Lovelace", "Grace Hopper", "Katherine Johnson"],
+        "authIdHal_s": ["ada", 0, 0],
+    }])
+
+    author_identity = report["hal"]["author_identity"]
+    self.assertEqual(author_identity["author_id_count"], 3)
+    self.assertEqual(author_identity["unknown_author_count"], 2)
+    self.assertEqual(author_identity["authors_without_hal_id"], 2)
+
+  def test_uses_person_id_fallback_in_author_identity_metrics(self):
+    report = build_data_quality_report([{
+        "halId_s": "hal-person-id-fallback",
+        "authFullName_s": ["Ada Lovelace", "Grace Hopper"],
+        "authIdHal_s": [0, 0],
+        "authIdPerson_i": [42, 43],
+    }])
+
+    author_identity = report["hal"]["author_identity"]
+    self.assertEqual(author_identity["author_id_count"], 2)
+    self.assertEqual(author_identity["unknown_author_count"], 0)
+    self.assertEqual(author_identity["unknown_author_share"], 0)
+
+  def test_uses_realigned_ids_in_author_identity_metrics(self):
+    report = build_data_quality_report([{
+        "halId_s": "hal-realigned-author-ids",
+        "authFullName_s": ["Ada Lovelace", "Grace Hopper"],
+        "authIdHal_s": ["grace-hopper", 0],
+        "authIdPerson_i": [42, 43],
+    }])
+
+    author_identity = report["hal"]["author_identity"]
+    self.assertEqual(author_identity["author_id_count"], 2)
+    self.assertEqual(author_identity["unknown_author_count"], 0)
+    self.assertEqual(author_identity["unknown_author_share"], 0)
+
 
 if __name__ == "__main__":
   unittest.main()
