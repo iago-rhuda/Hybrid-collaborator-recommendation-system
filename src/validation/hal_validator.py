@@ -71,6 +71,7 @@ def _validate_date_string(value, field_name: str, doc_index: int | None = None):
             message=f"{field_name} is not a valid ISO date: {value!r}",
             field=field_name,
             doc_index=doc_index,
+            severity="warning",
         )
     ]
 
@@ -99,6 +100,7 @@ def _validate_language_value(value, field_name: str, doc_index: int | None = Non
           message=f"{field_name} has an invalid language code: {value!r}",
           field=field_name,
           doc_index=doc_index,
+          severity="warning",
       )
   ]
 
@@ -124,6 +126,7 @@ def _compare_parallel_array_lengths(doc: dict, field_names: list[str], doc_index
               ),
               field=field_name,
               doc_index=doc_index,
+              severity="warning",
           )
       )
 
@@ -158,9 +161,10 @@ def _validate_document(doc: dict, doc_index: int | None = None):
     issues.append(
         ValidationIssue(
             code="missing_abstract",
-            message="abstract_s is required but missing or empty.",
+            message="abstract_s is missing or empty.",
             field="abstract_s",
             doc_index=doc_index,
+            severity="warning",
         )
     )
 
@@ -168,9 +172,10 @@ def _validate_document(doc: dict, doc_index: int | None = None):
     issues.append(
         ValidationIssue(
             code="missing_keywords",
-            message="keyword_s is required but missing or empty.",
+            message="keyword_s is missing or empty.",
             field="keyword_s",
             doc_index=doc_index,
+            severity="warning",
         )
     )
 
@@ -178,9 +183,10 @@ def _validate_document(doc: dict, doc_index: int | None = None):
     issues.append(
         ValidationIssue(
             code="missing_doi",
-            message="doiId_s is required but missing or empty.",
+            message="doiId_s is missing or empty.",
             field="doiId_s",
             doc_index=doc_index,
+            severity="warning",
         )
     )
 
@@ -206,6 +212,7 @@ def _validate_document(doc: dict, doc_index: int | None = None):
             message="No research domain is present in primaryDomain_s/domainAllCode_s/domain_s.",
             field="primaryDomain_s",
             doc_index=doc_index,
+            severity="warning",
         )
     )
 
@@ -268,6 +275,7 @@ def _validate_document(doc: dict, doc_index: int | None = None):
               message=f"publicationDateY_i is not an integer: {year_value!r}",
               field="publicationDateY_i",
               doc_index=doc_index,
+              severity="warning",
           )
       )
 
@@ -309,6 +317,7 @@ def _validate_document(doc: dict, doc_index: int | None = None):
             message="title_s contains multiple values; only one title is expected.",
             field="title_s",
             doc_index=doc_index,
+            severity="warning",
         )
     )
 

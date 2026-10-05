@@ -38,13 +38,13 @@ class HalValidatorTest(unittest.TestCase):
     report = validate_hal_documents(docs, num_found=2)
 
     self.assertFalse(report.is_valid)
-    self.assertTrue(any(issue.code == "missing_abstract" for issue in report.errors))
-    self.assertTrue(any(issue.code == "missing_keywords" for issue in report.errors))
-    self.assertTrue(any(issue.code == "missing_doi" for issue in report.errors))
+    self.assertTrue(any(issue.code == "missing_abstract" for issue in report.warnings))
+    self.assertTrue(any(issue.code == "missing_keywords" for issue in report.warnings))
+    self.assertTrue(any(issue.code == "missing_doi" for issue in report.warnings))
     self.assertTrue(any(issue.code == "duplicate_hal_id" for issue in report.errors))
-    self.assertTrue(any(issue.code == "malformed_date" for issue in report.errors))
-    self.assertTrue(any(issue.code == "malformed_language" for issue in report.errors))
-    self.assertTrue(any(issue.code == "parallel_array_length_mismatch" for issue in report.errors))
+    self.assertTrue(any(issue.code == "malformed_date" for issue in report.warnings))
+    self.assertTrue(any(issue.code == "malformed_language" for issue in report.warnings))
+    self.assertTrue(any(issue.code == "parallel_array_length_mismatch" for issue in report.warnings))
 
   def test_accepts_missing_optional_values_without_error(self):
     payload = {
@@ -68,6 +68,26 @@ class HalValidatorTest(unittest.TestCase):
 
     report = validate_hal_payload(payload)
     self.assertTrue(report.is_valid)
+
+  def test_measures_missing_optional_metadata_as_warnings(self):
+    report = validate_hal_documents([{
+        "halId_s": "hal-optional-metadata",
+        "title_s": ["Publication title"],
+        "authFullName_s": ["Ada Lovelace"],
+        "authIdHal_s": ["ada"],
+        "docType_s": ["ART"],
+    }])
+
+    self.assertTrue(report.is_valid)
+    self.assertEqual(
+        {issue.code for issue in report.warnings},
+        {
+            "missing_abstract",
+            "missing_keywords",
+            "missing_doi",
+            "missing_domains",
+        },
+    )
 
   def test_detects_http_and_pagination_issues(self):
     payload = {

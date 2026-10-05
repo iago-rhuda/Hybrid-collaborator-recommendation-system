@@ -1,0 +1,1656 @@
+{
+  "source": "Synthetic fixture generated from FakeAdapter; not HAL or Neo4j data.",
+  "project_count": 36,
+  "projects": [
+    {
+      "project_id": "fixture-hal-0001",
+      "title": "Synthetic research publication 01",
+      "abstract": "Synthetic abstract for publication 01.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2010,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0002",
+      "title": "Synthetic research publication 02",
+      "abstract": "Synthetic abstract for publication 02.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2011,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0003",
+      "title": "Synthetic research publication 03",
+      "abstract": "Synthetic abstract for publication 03.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2012,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0004",
+      "title": "Synthetic research publication 04",
+      "abstract": "Synthetic abstract for publication 04.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2013,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0005",
+      "title": "Synthetic research publication 05",
+      "abstract": "Synthetic abstract for publication 05.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2014,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0006",
+      "title": "Synthetic research publication 06",
+      "abstract": "Synthetic abstract for publication 06.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2015,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Sarah Faure",
+          "full_name": "Sarah Faure",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0007",
+      "title": "Synthetic research publication 07",
+      "abstract": "Synthetic abstract for publication 07.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2016,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0008",
+      "title": "Synthetic research publication 08",
+      "abstract": "Synthetic abstract for publication 08.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2017,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0009",
+      "title": "Synthetic research publication 09",
+      "abstract": "Synthetic abstract for publication 09.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2018,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0010",
+      "title": "Synthetic research publication 10",
+      "abstract": "Synthetic abstract for publication 10.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2019,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0011",
+      "title": "Synthetic research publication 11",
+      "abstract": "Synthetic abstract for publication 11.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2020,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0012",
+      "title": "Synthetic research publication 12",
+      "abstract": "Synthetic abstract for publication 12.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2021,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Pierre Leroy",
+          "full_name": "Pierre Leroy",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0013",
+      "title": "Synthetic research publication 13",
+      "abstract": "Synthetic abstract for publication 13.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2022,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0014",
+      "title": "Synthetic research publication 14",
+      "abstract": "Synthetic abstract for publication 14.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2023,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0015",
+      "title": "Synthetic research publication 15",
+      "abstract": "Synthetic abstract for publication 15.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2024,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0016",
+      "title": "Synthetic research publication 16",
+      "abstract": "Synthetic abstract for publication 16.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2010,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0017",
+      "title": "Synthetic research publication 17",
+      "abstract": "Synthetic abstract for publication 17.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2011,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0018",
+      "title": "Synthetic research publication 18",
+      "abstract": "Synthetic abstract for publication 18.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2012,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Sarah Faure",
+          "full_name": "Sarah Faure",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0019",
+      "title": "Synthetic research publication 19",
+      "abstract": "Synthetic abstract for publication 19.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2013,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0020",
+      "title": "Synthetic research publication 20",
+      "abstract": "Synthetic abstract for publication 20.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2014,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0021",
+      "title": "Synthetic research publication 21",
+      "abstract": "Synthetic abstract for publication 21.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2015,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0022",
+      "title": "Synthetic research publication 22",
+      "abstract": "Synthetic abstract for publication 22.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2016,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0023",
+      "title": "Synthetic research publication 23",
+      "abstract": "Synthetic abstract for publication 23.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2017,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0024",
+      "title": "Synthetic research publication 24",
+      "abstract": "Synthetic abstract for publication 24.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2018,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Pierre Leroy",
+          "full_name": "Pierre Leroy",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0025",
+      "title": "Synthetic research publication 25",
+      "abstract": "Synthetic abstract for publication 25.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2019,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0026",
+      "title": "Synthetic research publication 26",
+      "abstract": "Synthetic abstract for publication 26.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2020,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-002",
+          "full_name": "Benoit Laurent",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0027",
+      "title": "Synthetic research publication 27",
+      "abstract": "Synthetic abstract for publication 27.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2021,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-003",
+          "full_name": "Chloe Bernard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0028",
+      "title": "Synthetic research publication 28",
+      "abstract": "Synthetic abstract for publication 28.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2022,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-004",
+          "full_name": "David Petit",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0029",
+      "title": "Synthetic research publication 29",
+      "abstract": "Synthetic abstract for publication 29.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2023,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-005",
+          "full_name": "Emma Robert",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0030",
+      "title": "Synthetic research publication 30",
+      "abstract": "Synthetic abstract for publication 30.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2024,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-006",
+          "full_name": "Farid Richard",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Sarah Faure",
+          "full_name": "Sarah Faure",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0031",
+      "title": "Synthetic research publication 31",
+      "abstract": "Synthetic abstract for publication 31.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2010,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-007",
+          "full_name": "Gabrielle Durand",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0032",
+      "title": "Synthetic research publication 32",
+      "abstract": "Synthetic abstract for publication 32.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2011,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-008",
+          "full_name": "Hugo Dubois",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0033",
+      "title": "Synthetic research publication 33",
+      "abstract": "Synthetic abstract for publication 33.",
+      "keywords": [
+        "synthetic",
+        "topic-1"
+      ],
+      "year": 2012,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-009",
+          "full_name": "Ines Moreau",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.1",
+          "name": "Distributed systems",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0034",
+      "title": "Synthetic research publication 34",
+      "abstract": "Synthetic abstract for publication 34.",
+      "keywords": [
+        "synthetic",
+        "topic-2"
+      ],
+      "year": 2013,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-010",
+          "full_name": "Jules Simon",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.1",
+          "name": "Engineering",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.1.1",
+          "name": "Computer science",
+          "parent_ids": [
+            "fixture.1"
+          ]
+        },
+        {
+          "domain_id": "fixture.1.1.2",
+          "name": "Data management",
+          "parent_ids": [
+            "fixture.1",
+            "fixture.1.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0035",
+      "title": "Synthetic research publication 35",
+      "abstract": "Synthetic abstract for publication 35.",
+      "keywords": [
+        "synthetic",
+        "topic-3"
+      ],
+      "year": 2014,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-011",
+          "full_name": "Karim Michel",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.1",
+          "name": "Climate modelling",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "fixture-hal-0036",
+      "title": "Synthetic research publication 36",
+      "abstract": "Synthetic abstract for publication 36.",
+      "keywords": [
+        "synthetic",
+        "topic-4"
+      ],
+      "year": 2015,
+      "doc_type": "ART",
+      "authors": [
+        {
+          "person_id": "author-012",
+          "full_name": "Lea Lefebvre",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "author-001",
+          "full_name": "Ada Martin",
+          "is_placeholder": false
+        },
+        {
+          "person_id": "unknown_Pierre Leroy",
+          "full_name": "Pierre Leroy",
+          "is_placeholder": true
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fixture.2",
+          "name": "Environmental science",
+          "parent_ids": []
+        },
+        {
+          "domain_id": "fixture.2.1",
+          "name": "Climate research",
+          "parent_ids": [
+            "fixture.2"
+          ]
+        },
+        {
+          "domain_id": "fixture.2.1.2",
+          "name": "Remote sensing",
+          "parent_ids": [
+            "fixture.2",
+            "fixture.2.1"
+          ]
+        }
+      ]
+    }
+  ]
+}
