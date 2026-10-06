@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
@@ -240,7 +241,12 @@ def main() -> None:
   finally:
     driver.close()
 
-  print(json.dumps(report, ensure_ascii=False, indent=2))
+    reports_dir = Path(__file__).resolve().parents[2] / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    report_path = reports_dir / "neo4j_integrity_report.json"
+    report_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":

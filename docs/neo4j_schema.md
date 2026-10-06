@@ -1,9 +1,16 @@
 # Neo4j schema: discovered state
 
-This document records the schema and counts observed in the configured live
-Neo4j database on **2026-10-04**. Counts are a point-in-time snapshot and can
-change as data is loaded or removed. The repository's graph-writing code is in
+This document records the schema and counts observed in a configured live
+Neo4j database on **2026-10-04**. Those counts are a historical point-in-time
+snapshot and can change as data is loaded or removed. The repository's
+graph-writing code is in
 [`src/database/neo4j_manager.py`](../src/database/neo4j_manager.py).
+
+Read-only integrity reports were also captured on 2026-10-06. They do not
+record the database name and disagree in their finding totals; do not interpret
+them as a directly comparable recount of the 2026-10-04 profile. See
+[`data_quality.md`](data_quality.md) for the report comparison and required
+follow-up.
 
 ## How to inspect the schema
 
@@ -120,6 +127,11 @@ edges instead.
 These constraints prevent future duplicate values for the constrained
 properties; they do not establish that every node has a valid or meaningful
 identifier, nor do they prove that historical ingestion was complete.
+
+The later 2026-10-06 integrity reports both found all five expected unique
+constraints missing from the database they inspected. Since those reports do
+not identify their target database, verify constraints against the database
+selected for Stage B before relying on this historical constraint inventory.
 
 ## What this schema proves
 

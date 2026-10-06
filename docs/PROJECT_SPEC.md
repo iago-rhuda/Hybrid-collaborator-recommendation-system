@@ -99,6 +99,11 @@ Check duplicate ids, orphans, cycles, inconsistent parent/child (parent must be 
 ### 6.6 Data-quality report
 Reproducible `reports/data_quality_<date>.md/json`: records retrieved, projects/authors/domains counts, missing abstracts/keywords/DOI/authors/domains, duplicate ids, transformation mismatches, hierarchy violations, invalid relationships.
 
+`exports/` and `reports/` are ignored by Git, so snapshots and generated
+reports are local artifacts and are not shared through GitHub. Commit only
+reviewed, credential-free aggregate summaries in tracked documentation; do
+not commit credentials or raw HAL snapshots.
+
 ### 6.7 Extra metrics (from the known caveats)
 Author-array length mismatch rate per record (`authIdHal_s`, `authIdPerson_i`, `authFirstName_s`, ... vs `authFullName_s`); `unknown_` author share; homonym collisions; records with missing/`Unknown` halId; Organization nodes without name/type; multi-language abstracts; stale-node test (re-ingest changed snapshot and diff); `numFound` vs fetched; snapshot-vs-snapshot instability.
 
