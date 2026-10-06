@@ -62,11 +62,11 @@ tests/
   test_research_domain_transformer.py
 ```
 
-`src/capability/`, `src/graph/`, `src/rag/`, `src/recommender/`,
-`src/requirements/`, and `src/validation/` are reserved for future work and
-currently contain no implemented feature modules. `src/config.py` and
-`src/connectors/orcid_client.py` are empty placeholders. The models are in
-`src/models/` (not `src/graph/models/`).
+`src/capability/`, `src/graph/`, `src/rag/`, `src/recommender/`, and
+`src/requirements/` are reserved for future work. `src/validation/` contains
+HAL response validation, ETL comparison, and Neo4j integrity checks.
+`src/config.py` and `src/connectors/orcid_client.py` are empty placeholders.
+The models are in `src/models/` (not `src/graph/models/`).
 
 ## Installation
 
@@ -251,6 +251,93 @@ records; it has no row limit or dry-run mode. Start with the CSV exporter
 when checking data. Existing graph properties are set with `ON CREATE SET`,
 so re-running ingestion does not refresh properties on nodes that already
 exist.
+
+### Validate an author-identity change on a dev subset
+
+The author extractor now repairs only uniquely name-matched cross-position
+HAL IDs and uses `authIdPerson_i` before the name-based fallback. To exercise
+the changed path without fetching or ingesting the whole corpus, provide a
+snapshot, an explicit limit of at most 2,000 records, and a dedicated,
+isolated Neo4j dev database:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+& .\.venv\Scripts\python.exe src\pipeline.py `
+  --snapshot exports\hal_snapshot\hal_snapshot_20261005T191317Z\records.jsonl `
+  --limit 1000 `
+  --database author_identity_dev
+```
+
+The snapshot is ordered by `halId_s`; the first 1,000 records make this a
+repeatable integration smoke test of the transformer and graph writes. Unit
+tests separately exercise the confirmed shift, fallback, and ambiguous-match
+cases. This bounded subset is sufficient to catch failures in those changed
+paths and the persistence call, but it is not a new full-corpus quality
+estimate. Run only against a dev database, not the shared or production
+database.
+
+Neo4j writes use `MERGE` and `ON CREATE SET`; re-ingestion does not remove old
+author-to-project relationships or refresh existing author properties. A
+full-data rollout therefore requires a separately reviewed migration or
+rebuild strategy for previously persisted author identities, followed by
+re-ingestion of the complete snapshot and full integrity/data-quality checks.
+Do not treat a successful 1,000-record dev run as authorization for that
+full-data operation.
+
+## Check Neo4j integrity
+
+Run the read-only integrity checks after configuring the `.env` Neo4j
+connection:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.neo4j_integrity
+```
+
+The JSON report marks uniqueness-constraint verification as a **preventive**
+control and graph scans (duplicate nodes, missing links, orphan or bare
+nodes, repeated relationships, and `unknown_` authors) as **diagnostic**
+checks. Findings are reported; the command does not modify the graph.
+
+## Validate the ResearchDomain hierarchy
+
+Run the read-only hierarchy checks against Neo4j with the same connection
+settings:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.hierarchy
+```
+
+The checker validates cycles, orphan domain nodes, missing edge endpoints,
+dotted-prefix parent rules, duplicate edges, the expected maximum of three
+domain levels, and malformed IDs or labels. HAL's `ResearchDomain` taxonomy
+is authoritative source data; recommendation logic may use it but must not
+rewrite it. Inferred capabilities and project requirements are separate data,
+so they cannot silently alter the taxonomy's meaning.
+
+## Generate a data-quality report
+
+Build date-stamped Markdown and JSON reports from a HAL snapshot. The HAL
+validation runs automatically; previously generated ETL, hierarchy, and
+Neo4j integrity JSON results can be included as optional inputs:
+
+Snapshot records pad requested or present `auth*` arrays to the author count,
+using numeric `0` where a corresponding author value is missing. Reports treat
+that author-ID placeholder as missing.
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.report .\exports\hal_snapshot\<snapshot>\records.jsonl `
+  --manifest .\exports\hal_snapshot\<snapshot>\manifest.json
+```
+
+The output is written to `reports/data_quality_<date>.json` and `.md`.
+Supply existing check results with `--etl-comparison`, `--hierarchy`, and
+`--integrity` when available. Omit checks that have not been run; the report
+marks them as `not_run` and lists them as open risks rather than implying they
+passed. Missingness is reported as a measured rate and does not itself mean
+an optional HAL field is invalid.
 
 ## Tests
 

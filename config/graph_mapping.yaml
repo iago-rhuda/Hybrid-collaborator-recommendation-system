@@ -1,0 +1,26 @@
+nodes:
+  project:
+    label: Project
+    key: halId
+    properties:
+      title: title
+      abstract: abstract
+      keywords: keywords
+      year: publicationYear
+      doc_type: documentType
+  person:
+    label: Author
+    key: halId
+    properties:
+      full_name: fullName
+      first_name: firstName
+      last_name: lastName
+  domain:
+    label: ResearchDomain
+    key: id
+    properties:
+      name: name
+relationships:
+  authorship: WROTE
+  project_domain: HAS_RESEARCH_DOMAIN
+  domain_parent: SUBDOMAIN_OF

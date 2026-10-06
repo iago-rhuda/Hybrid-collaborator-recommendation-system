@@ -7,15 +7,16 @@ logger = get_logger(__name__)
 
 load_dotenv()
 
-URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-USER = os.getenv("NEO4J_USER", "neo4j")
-PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+URI = os.getenv("NEO4J_URI")
+USER = os.getenv("NEO4J_USER")
+PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 
 class Neo4jManager:
 
-  def __init__(self):
+  def __init__(self, database=None):
     self.driver = GraphDatabase.driver(URI, auth=(USER, PASSWORD))
+    self.database = database
 
   def close(self):
     self.driver.close()
@@ -29,7 +30,7 @@ class Neo4jManager:
         "CREATE CONSTRAINT research_domain_id IF NOT EXISTS FOR (d:ResearchDomain) REQUIRE d.id IS UNIQUE",
         "CREATE CONSTRAINT organization_hal_id IF NOT EXISTS FOR (o:Organization) REQUIRE o.halId IS UNIQUE",
     ]
-    with self.driver.session() as session:
+    with self.driver.session(database=self.database) as session:
       for q in queries:
         session.run(q)
     logger.info("Uniqueness constraints successfully configured in Neo4j (no duplicates).")
@@ -113,7 +114,7 @@ class Neo4jManager:
             MERGE (source)-[:PART_OF]->(target)
         )
         """
-    with self.driver.session() as session:
+    with self.driver.session(database=self.database) as session:
       session.run(
           query,
           project_hal_id=project["halId"],
