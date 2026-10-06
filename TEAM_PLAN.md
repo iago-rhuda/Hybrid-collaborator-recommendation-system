@@ -121,13 +121,13 @@ While waiting (B on Days 1–2, C on Days 1–4): onboarding only — read the s
 4. GraphRAG `context.py` + `explain.py` with citation check and template fallback.
 5. Full-data run: rerun A's validation/report, final quality report; final docs; README corrected (query scope, env vars).
 
-**Gate 3 = Definition of done**
-- [ ] `unittest` green; validation CLI runs independently of the recommender.
-- [ ] Recommendation output shows features, weights, contributions, evidence ids.
-- [ ] Every explanation sentence traces to supplied evidence ids; unknown ids rejected; LLM failure falls back to template.
-- [ ] Capabilities carry provenance; v1/v2 coexistence documented.
-- [ ] Docs state what comes from HAL vs what is inferred.
-- [ ] Demo script runs on a real project.
+**Gate 3 = Definition of done (COMPLETED)**
+- [x] `unittest` green; validation CLI runs independently of the recommender.
+- [x] Recommendation output shows features, weights, contributions, evidence ids.
+- [x] Every explanation sentence traces to supplied evidence ids; unknown ids rejected; LLM failure falls back to template.
+- [x] Capabilities carry provenance; v1/v2 coexistence documented.
+- [x] Docs state what comes from HAL vs what is inferred.
+- [x] Demo script runs on a real project.
 
 ### Copilot prompts — Stage C
 **C1 Gaps + candidates**

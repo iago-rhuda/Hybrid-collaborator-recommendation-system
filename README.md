@@ -12,10 +12,7 @@ The project is still evolving. The current architectural rule is to keep these c
 
 ## Overview
 
-The pipeline searches HAL publications related to `data science`, extracts entities and relationships, and can:
-
-- save normalized data to Neo4j;
-- export normalized data to CSV for validation before database insertion.
+The pipeline ingests publications from the HAL API (default query is `*:*`, harvesting the UTC repository, or filtered queries), extracts entities and relationships, extracts and aggregates research capabilities, and powers a research collaboration recommender.
 
 Currently modeled entities:
 
@@ -237,6 +234,36 @@ The pipeline:
 2. Normalizes metadata using `processing/transformer.py`.
 3. Creates Neo4j uniqueness constraints.
 4. Saves graph nodes and relationships.
+
+## Collaborator Recommendation (Stage C)
+
+Run collaborator recommendations using the CLI:
+
+```bash
+# Recommend for an existing publication (using in-memory fixtures)
+PYTHONPATH=src python3 src/recommend_cli.py --project-id hal-001 --use-fake-adapter --top-k 5
+
+# Recommend for a new free-text project specification
+PYTHONPATH=src python3 src/recommend_cli.py \
+  --title "Privacy-Preserving Federated Learning" \
+  --keywords "federated learning, differential privacy" \
+  --use-fake-adapter --top-k 3
+
+# Recommend on live Neo4j database
+PYTHONPATH=src python3 src/recommend_cli.py --project-id anses-03212886 --top-k 5
+```
+
+### End-to-End Demo
+
+Run the comprehensive demo script:
+
+```bash
+# Demo with static fixtures
+PYTHONPATH=src python3 demo.py
+
+# Demo connecting to live Neo4j
+PYTHONPATH=src python3 demo.py --live
+```
 
 ## Tests
 

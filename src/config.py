@@ -36,7 +36,7 @@ def get_neo4j_config() -> dict:
       "uri": os.getenv("NEO4J_URI", "bolt://localhost:7687"),
       "user": os.getenv("NEO4J_USER", "neo4j"),
       "password": os.getenv("NEO4J_PASSWORD", "password"),
-      "database": os.getenv("NEO4J_DATABASE", "neo4j"),
+      "database": os.getenv("NEO4J_DATABASE", ""),
   }
 
 
@@ -57,10 +57,24 @@ def get_ranking_config() -> dict:
 
 def get_llm_config() -> dict:
   """Return LLM provider configuration from environment variables."""
+  google_key = os.getenv("GOOGLE_AI_STUDIO") or os.getenv("GEMINI_API_KEY", "")
+  openai_key = os.getenv("OPENAI_API_KEY", "")
+  
+  # Auto-detect provider if google key is present
+  default_provider = "gemini" if google_key and not openai_key else "openai"
+  provider = os.getenv("LLM_PROVIDER", default_provider).lower()
+
+  if provider in ("gemini", "google"):
+    default_model = "gemini-2.5-flash"
+    api_key = google_key
+  else:
+    default_model = "gpt-4o-mini"
+    api_key = openai_key
+
   return {
-      "provider": os.getenv("LLM_PROVIDER", "openai"),
-      "model": os.getenv("LLM_MODEL", "gpt-4o-mini"),
-      "api_key": os.getenv("OPENAI_API_KEY", ""),
+      "provider": provider,
+      "model": os.getenv("LLM_MODEL", default_model),
+      "api_key": api_key,
       "cache_dir": os.getenv(
           "LLM_CACHE_DIR",
           str(_PROJECT_ROOT / "data" / "llm_cache"),
