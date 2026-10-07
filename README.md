@@ -1,8 +1,8 @@
 # Hybrid Collaborator Recommendation System
 
-Data engineering pipeline for collecting publication metadata from the HAL API, normalizing it into canonical domain models, and preparing it for insertion into a Neo4j knowledge graph.
+HAL publication ingestion pipeline that fetches records from the UTC HAL portal, transforms them into canonical Python models, exports normalized CSV tables, and can persist them to Neo4j.
 
-The project is still evolving. The current architectural rule is to keep these concerns separate:
+This README describes the current implemented repository state. The collaborator recommender is a future target; see [the current-vs-target status document](docs/CURRENT_STATE_VS_TARGET_STATE.md) and [the project spec](docs/PROJECT_SPEC.md) for the staged architecture. The current code separates:
 
 - raw data from external APIs;
 - data transformation and normalization;
@@ -40,7 +40,7 @@ src/
     orcid_client.py        # Placeholder for ORCID integration
   database/
     neo4j_manager.py       # Neo4j persistence
-  models/
+  models/                  # Canonical entity and extraction dataclasses
     author.py              # Canonical author model
     conference.py          # Canonical conference model
     organization.py        # Canonical organization model
@@ -50,7 +50,7 @@ src/
     transformer.py         # HAL -> canonical model transformations
   queries/
     graph_querier.py       # Graph queries
-  export_pipeline_csv.py   # Pipeline dry run exporting CSV files
+  export_pipeline_csv.py   # HAL-to-CSV validation/export CLI
   pipeline.py              # Neo4j ingestion pipeline
 
 tests/
@@ -58,6 +58,12 @@ tests/
   test_organization_transformer.py
   test_research_domain_transformer.py
 ```
+
+`src/capability/`, `src/graph/`, `src/rag/`, `src/recommender/`, and
+`src/requirements/` are reserved for future work. `src/validation/` contains
+HAL response validation, ETL comparison, and Neo4j integrity checks.
+`src/config.py` and `src/connectors/orcid_client.py` are empty placeholders.
+The models are in `src/models/` (not `src/graph/models/`).
 
 ## Installation
 
@@ -77,21 +83,22 @@ Example:
 
 ```env
 NEO4J_URI=neo4j+s://your-instance.databases.neo4j.io
-NEO4J_USERNAME=neo4j
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=your-password
-NEO4J_DATABASE=neo4j
-AURA_INSTANCEID=your-instance-id
-AURA_INSTANCENAME=your-instance-name
 ```
 
-Note: the current `Neo4jManager` reads `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`.
+`Neo4jManager` reads `NEO4J_URI`, `NEO4J_USER`, and `NEO4J_PASSWORD`, with
+local defaults of `bolt://localhost:7687`, `neo4j`, and `password`.
+`GraphQuerier` reads the same variables but has no defaults. Set all three
+explicitly when using either component. The pipeline writes data; run it only
+against the intended database.
 
 ## Canonical Models
 
 ### Project
 
-Represents the normalized HAL publication/document.
+Represents a normalized HAL publication/document. The code calls this entity
+`Project`; it is not a funded research project.
 
 Fields:
 
@@ -188,7 +195,7 @@ Main field groups:
 
 Before populating Neo4j, use the CSV exporter to inspect the generated instances.
 
-Run the default search with only one publication:
+Run the default HAL query with at most one publication:
 
 ```bash
 python3 src/export_pipeline_csv.py --rows 1 --output exports/pipeline_csv_test
@@ -228,7 +235,7 @@ After validating the CSV output and configuring `.env`, run:
 PYTHONPATH=src python3 src/pipeline.py
 ```
 
-The pipeline:
+The pipeline currently:
 
 1. Fetches publications from HAL.
 2. Normalizes metadata using `processing/transformer.py`.
@@ -265,6 +272,100 @@ PYTHONPATH=src python3 demo.py
 PYTHONPATH=src python3 demo.py --live
 ```
 
+`HalClient` defaults to the HAL query `*:*` on the UTC portal. The CSV
+exporter defaults to one record, but `pipeline.py` fetches all matching
+records; it has no row limit or dry-run mode. Start with the CSV exporter
+when checking data. Existing graph properties are set with `ON CREATE SET`,
+so re-running ingestion does not refresh properties on nodes that already
+exist.
+
+### Validate an author-identity change on a dev subset
+
+The author extractor now repairs only uniquely name-matched cross-position
+HAL IDs and uses `authIdPerson_i` before the name-based fallback. To exercise
+the changed path without fetching or ingesting the whole corpus, provide a
+snapshot, an explicit limit of at most 2,000 records, and a dedicated,
+isolated Neo4j dev database:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+& .\.venv\Scripts\python.exe src\pipeline.py `
+  --snapshot exports\hal_snapshot\hal_snapshot_20261005T191317Z\records.jsonl `
+  --limit 1000 `
+  --database author_identity_dev
+```
+
+The snapshot is ordered by `halId_s`; the first 1,000 records make this a
+repeatable integration smoke test of the transformer and graph writes. Unit
+tests separately exercise the confirmed shift, fallback, and ambiguous-match
+cases. This bounded subset is sufficient to catch failures in those changed
+paths and the persistence call, but it is not a new full-corpus quality
+estimate. Run only against a dev database, not the shared or production
+database.
+
+Neo4j writes use `MERGE` and `ON CREATE SET`; re-ingestion does not remove old
+author-to-project relationships or refresh existing author properties. A
+full-data rollout therefore requires a separately reviewed migration or
+rebuild strategy for previously persisted author identities, followed by
+re-ingestion of the complete snapshot and full integrity/data-quality checks.
+Do not treat a successful 1,000-record dev run as authorization for that
+full-data operation.
+
+## Check Neo4j integrity
+
+Run the read-only integrity checks after configuring the `.env` Neo4j
+connection:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.neo4j_integrity
+```
+
+The JSON report marks uniqueness-constraint verification as a **preventive**
+control and graph scans (duplicate nodes, missing links, orphan or bare
+nodes, repeated relationships, and `unknown_` authors) as **diagnostic**
+checks. Findings are reported; the command does not modify the graph.
+
+## Validate the ResearchDomain hierarchy
+
+Run the read-only hierarchy checks against Neo4j with the same connection
+settings:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.hierarchy
+```
+
+The checker validates cycles, orphan domain nodes, missing edge endpoints,
+dotted-prefix parent rules, duplicate edges, the expected maximum of three
+domain levels, and malformed IDs or labels. HAL's `ResearchDomain` taxonomy
+is authoritative source data; recommendation logic may use it but must not
+rewrite it. Inferred capabilities and project requirements are separate data,
+so they cannot silently alter the taxonomy's meaning.
+
+## Generate a data-quality report
+
+Build date-stamped Markdown and JSON reports from a HAL snapshot. The HAL
+validation runs automatically; previously generated ETL, hierarchy, and
+Neo4j integrity JSON results can be included as optional inputs:
+
+Snapshot records pad requested or present `auth*` arrays to the author count,
+using numeric `0` where a corresponding author value is missing. Reports treat
+that author-ID placeholder as missing.
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m validation.report .\exports\hal_snapshot\<snapshot>\records.jsonl `
+  --manifest .\exports\hal_snapshot\<snapshot>\manifest.json
+```
+
+The output is written to `reports/data_quality_<date>.json` and `.md`.
+Supply existing check results with `--etl-comparison`, `--hierarchy`, and
+`--integrity` when available. Omit checks that have not been run; the report
+marks them as `not_run` and lists them as open risks rather than implying they
+passed. Missingness is reported as a measured rate and does not itself mean
+an optional HAL field is invalid.
+
 ## Tests
 
 Run all tests:
@@ -284,7 +385,10 @@ Current tests cover:
 - research domain extraction;
 - research domain hierarchy;
 - organization extraction;
-- HAL parallel array alignment;
+- organization parallel-array alignment and sparse identifiers.
+
+There are no recommender, capability extraction, graph-adapter, or Dublin
+Core transformation tests because those features are not implemented.
 - deduplication by HAL identifier;
 - CSV pipeline export.
 

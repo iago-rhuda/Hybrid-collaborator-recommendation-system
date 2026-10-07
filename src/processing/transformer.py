@@ -1,3 +1,6 @@
+import re
+import unicodedata
+
 from models.author import Author
 from models.conference import Conference
 from models.organization import (
@@ -46,7 +49,54 @@ def _get_list_value(values, index: int, default=""):
 
 def _get_int_list_value(values, index: int):
   value = _get_list_value(values, index, None)
-  return int(value) if value is not None and str(value).isdigit() else None
+  if value is None or not str(value).isdigit():
+    return None
+  parsed = int(value)
+  return parsed if parsed else None
+
+
+def _author_name_key(value) -> str:
+  normalized = unicodedata.normalize("NFKD", str(value)).encode(
+      "ascii",
+      "ignore",
+  ).decode("ascii").lower()
+  return re.sub(r"[^a-z0-9]+", "-", normalized).strip("-")
+
+
+def _aligned_hal_author_ids(names: list, values) -> list:
+  values = _as_list(values)
+  positional = []
+  for index in range(len(names)):
+    value = _get_list_value(values, index, None)
+    positional.append(
+        value if value is not None and str(value).strip() != "0" else None
+    )
+  name_indexes: dict[str, list[int]] = {}
+  for index, name in enumerate(names):
+    key = _author_name_key(name)
+    if key:
+      name_indexes.setdefault(key, []).append(index)
+
+  matches: dict[int, list[tuple[int, str]]] = {}
+  has_shifted_match = False
+  for source_index, value in enumerate(positional):
+    if not value:
+      continue
+    target_indexes = name_indexes.get(_author_name_key(value), [])
+    if len(target_indexes) != 1:
+      continue
+    target_index = target_indexes[0]
+    matches.setdefault(target_index, []).append((source_index, str(value)))
+    has_shifted_match |= target_index != source_index
+
+  if not has_shifted_match:
+    return positional
+
+  aligned = [None] * len(names)
+  for target_index, candidates in matches.items():
+    if len(candidates) == 1:
+      aligned[target_index] = candidates[0][1]
+  return aligned
 
 
 def _get_parallel_value(values, index: int, expected_length: int):
@@ -204,7 +254,8 @@ def _parse_organization_relationship(value):
 
 def extract_authors_from_hal_record(doc: dict) -> list[Author]:
   """Maps HAL author fields to the common Author schema."""
-  names = doc.get("authFullName_s", [])
+  names = _as_list(doc.get("authFullName_s"))
+  hal_ids = _aligned_hal_author_ids(names, doc.get("authIdHal_s", []))
   authors = []
 
   for index, full_name in enumerate(names):
@@ -216,13 +267,18 @@ def extract_authors_from_hal_record(doc: dict) -> list[Author]:
       first_name = name_parts[0]
       last_name = name_parts[1] if len(name_parts) > 1 else ""
 
-    hal_id = _get_list_value(doc.get("authIdHal_s", []), index)
+    person_id = _get_int_list_value(doc.get("authIdPerson_i", []), index)
+    hal_id = hal_ids[index]
     if not hal_id:
-      hal_id = f"unknown_{full_name or index}"
+      hal_id = (
+          f"person_{person_id}"
+          if person_id is not None
+          else f"unknown_{full_name or index}"
+      )
 
     authors.append(
         Author(
-            person_id=_get_int_list_value(doc.get("authIdPerson_i", []), index),
+            person_id=person_id,
             hal_id=str(hal_id),
             first_name=str(first_name),
             last_name=str(last_name),

@@ -47,17 +47,64 @@ While waiting (B on Days 1–2, C on Days 1–4): onboarding only — read the s
 **Handoff pack:** merged PR, report, `docs/neo4j_schema.md`, fixtures, dev DB access notes.
 
 ### Copilot prompts — Stage A
-**A1 Snapshot + HAL validation**
-> Inspect `HalClient`, `transformer.py`, `export_pipeline_csv.py`. Create `src/connectors/hal_snapshot.py` wrapping `HalClient.fetch_publications` to write a reproducible JSONL snapshot (`data/snapshots/hal_<date>.jsonl`) plus manifest (query, fields, numFound, fetched count, timestamp). Do not modify `HalClient` unless a problem is proven (snapshot twice and diff; compare numFound vs fetched). Create `src/validation/hal_validator.py` for response structure/HTTP errors, pagination completeness, required vs optional fields, types, duplicate halId, missing abstract/keywords/DOI/authors/domains, malformed dates, language, docType, and parallel-array length mismatches for authors and organizations. Missing optional values are measured, not errors. Tests with malformed fixtures. CLI must run without Neo4j.
 
-**A2 ETL + Neo4j validation + report**
-> Create `src/validation/etl_compare.py` (reuse `build_csv_tables_from_hal_docs` as expected state vs Neo4j: ids, title, abstract, keywords, authors, domains, orgs, conferences, dates, relationship counts/losses, duplicates), `neo4j_integrity.py` (parameterised Cypher: duplicate ids, projects without authors/domains, orphan domains/orgs, bare Organization nodes, relationship multiplicity, `unknown_` authors), `hierarchy.py` (cycles, orphans, dotted-prefix parent rule, depth <= 3, malformed names) and `report.py` writing `reports/data_quality_<date>.md/json` with all spec §6.6–6.7 metrics. Document the discovered schema in `docs/neo4j_schema.md` using `db.schema.visualization()` and counts.
+For every micro-step below, do the following before moving on:
+1. Inspect the relevant code and confirm what is already implemented and what must be reused.
+2. Explain to the member: what you inspected, what you changed, why the change is needed, and what assumption or uncertainty remains.
+3. Run the smallest relevant validation and report the result.
+4. If the requirement is ambiguous, the data is inconsistent, or the repo does not support the expected behavior, use the interactive AI agent to ask a precise clarifying question before proceeding.
+5. Do not guess schema details or silently change unrelated code.
 
-**A3 Author identity + dev load**
-> From the report quantify author-array misalignment and homonym/`unknown_` collisions. Propose the smallest safe ETL change (length-guarded parallel values for authors, id fallback order) with justification, add regression tests, and re-ingest only the dev subset. Change nothing else in the ETL.
+**A1.1 Reuse and baseline check**
+> Inspect `HalClient`, `transformer.py`, `export_pipeline_csv.py`, and the current tests. List what is already implemented, what should be reused, and what is missing for Stage A. Explain the baseline to the member before writing any new code.
 
-**A4 Contracts + adapter**
-> Create `src/graph/adapter.py` (Protocol + frozen dataclasses exactly as in spec §12, all methods), `fake_adapter.py` with fixtures (>= 30 projects, overlapping authors, domain hierarchy, a few placeholder authors), `src/config.py` and `config/graph_mapping.yaml`, and `neo4j_adapter.py` implementing the fact methods with parameterised Cypher using only the mapping. Contract tests run against both adapters. Write `tests/fixtures/dev_projects.json` from the dev DB.
+**A1.2 Snapshot writer**
+> Create `src/connectors/hal_snapshot.py` to wrap `HalClient.fetch_publications` and write a reproducible JSONL snapshot plus a manifest containing query, requested fields, `numFound`, fetched count, and timestamp. If the HAL response structure is inconsistent, measure it first and explain the mismatch before changing code. Do not modify `HalClient` unless the issue is proven and documented.
+
+**A1.3 HAL validation**
+> Create `src/validation/hal_validator.py` to validate response structure, HTTP errors, pagination completeness, required vs optional fields, types, duplicate `halId`, missing abstract/keywords/DOI/authors/domains, malformed dates, language, `docType`, and author/organization parallel-array length mismatches. Treat missing optional values as measured data, not as failing errors. Add tests using malformed fixtures. Report to the member what each validation catches and why it matters.
+
+**A1.4 Snapshot consistency check**
+> Run the snapshot logic twice on the same query and compare outputs. Explain any drift, changes in `numFound`, missing rows, or unstable pagination. If a discrepancy appears, use the interactive agent to decide whether to inspect one more real example before proceeding with a minimal fix.
+
+**A2.1 ETL vs Neo4j comparison**
+> Create `src/validation/etl_compare.py` to compare the expected transformed state from `build_csv_tables_from_hal_docs` against the real Neo4j data. Check identifiers, titles, abstracts, keywords, authors, domains, organizations, conferences, dates, relationship counts, duplicate records, and relationship losses. Explain mismatches to the member with a clear cause hypothesis before fixing anything.
+
+**A2.2 Integrity checks**
+> Create `src/validation/neo4j_integrity.py` with parameterised Cypher checks for duplicate IDs, projects without authors or domains, orphan domains or organizations, bare `Organization` nodes, relationship multiplicity, and `unknown_` authors. Report which checks are preventive vs which are diagnostic.
+
+**A2.3 Hierarchy validation**
+> Create `src/validation/hierarchy.py` to validate domain hierarchy for cycles, orphan nodes, dotted-prefix parent rules, depth assumptions, and malformed names. Explain why the taxonomy is treated as authoritative and why no recommender logic should rewrite it.
+
+**A2.4 Data-quality report**
+> Create `src/validation/report.py` to write `reports/data_quality_<date>.md/json` with the metrics required by spec §6.6–6.7. Include counts, missingness, duplicate IDs, mismatches, and hierarchy violations. Summarize the report for the member with short, concrete conclusions and open risks.
+
+**A2.5 Schema documentation**
+> Document the discovered Neo4j schema in `docs/neo4j_schema.md` using a schema inspection command and counts from the live database. Explain what the schema proves and what remains uncertain.
+
+**A3.1 Author-identity investigation**
+> Review the data-quality report and quantify author-array misalignment, homonym collisions, and `unknown_` author rate. Explain the evidence to the member before making any ETL fix. If the numbers are ambiguous or not yet sufficient, use the interactive agent to inspect a concrete sample of records.
+
+**A3.2 Minimal ETL fix**
+> If a safe ETL fix is justified, implement the smallest possible change (for example: length-guarded parallel values or a more careful fallback order). Keep the change designed only for the measured problem and do not broaden the scope. Explain exactly why this fix is necessary and why other ETL behaviors are left unchanged.
+
+**A3.3 Regression tests and dev subset**
+> Add regression tests for the author-identity fix and re-ingest only the dev subset. Document what was changed, why the dev subset is enough for validation, and what would require a full-data rerun later.
+
+**A4.1 Adapter contract discovery**
+> Create `src/graph/adapter.py` with the required Protocol and dataclasses exactly as specified. Note which parts are fact methods and which remain future-only stubs. Explain the contract to the member before implementing the first query method.
+
+**A4.2 Fake adapter and fixtures**
+> Create `src/graph/fake_adapter.py` with fixtures containing at least ~30 projects, overlapping authors, domain hierarchy, and placeholder authors. Explain the fixture design choices and why they are sufficient for Stage A contract tests.
+
+**A4.3 Neo4j fact methods**
+> Implement `src/graph/neo4j_adapter.py` for the fact methods only (`get_project`, `iter_projects`, `get_project_members`, `get_project_domains`) using parameterised Cypher and the mapping configuration. Keep the implementation strictly limited to current database facts and explain any assumptions in plain language.
+
+**A4.4 Config and dev data**
+> Create `src/config.py` and `config/graph_mapping.yaml`, then write `tests/fixtures/dev_projects.json` from the dev subset. Explain what the config centralizes and why the mapping must stay separate from recommender logic.
+
+**A4.5 Final Stage A validation**
+> Run the relevant tests and report the results to the member: which checks passed, which failed, and what was changed to correct the issue. Only proceed to Stage B after the Stage A gate is clearly green.
 
 ---
 
@@ -89,20 +136,61 @@ While waiting (B on Days 1–2, C on Days 1–4): onboarding only — read the s
 **Handoff pack:** merged PR, fixtures, examples, capability docs, instructions to run the full extraction (C launches it in the background on Day 5).
 
 ### Copilot prompts — Stage B
-**B1 Models + normalization**
-> Create `src/capability/models.py` (Pydantic `ExtractedCapability{name, normalized_name, kind, evidence, confidence}`, `CapabilityExtractionResult`, kind enum DOMAIN/METHOD/TECHNIQUE/TECHNOLOGY/TOOL/TOPIC/METHODOLOGY/UNKNOWN), `config/capability.yaml` (stoplist, thresholds, versions, recency half-life, minimum evidence) and `normalization.py` (lowercase, accents, whitespace, English canonical slug -> deterministic `id`). Add dependencies to requirements. Tests: normalization, deterministic ids, generic-term rejection.
 
-**B2 Extraction**
-> Implement `extraction.py`: LangChain chain over title + abstract + keywords + domain hierarchy (via adapter `iter_projects`/`get_project_domains`; FakeAdapter in tests). Corpus is fr/en: English `normalized_name`, original term kept as alias. Reject capabilities whose `evidence` is not in the input text. Do not convert domains to capabilities. Disk cache keyed by (project id, prompt version, model). CLI flags `--limit --version --dry-run --resume`. Tests with a fake LLM: valid, unsupported, generic, malformed output.
+For every micro-step below, do the following before moving on:
+1. Reuse the Stage A outputs and confirm what is already stable.
+2. Explain to the member: what was inspected, what was changed, why the new code is needed, and what remains to validate.
+3. Keep diffs narrow and stage-scoped. Do not edit earlier-stage code unless a concrete bug is proven.
+4. After each small change, run the relevant tests and report the outcome.
+5. If the LLM output, config values, or Neo4j behavior is ambiguous, use the interactive AI agent to clarify or inspect a representative example before continuing.
 
-**B3 Resolution + persistence**
-> Implement `resolution.py` (normalize -> exact -> alias -> embedding similarity above configurable threshold via an `Embedder` interface -> create; conservative on abbreviations) and `repository.py` writing `Capability` nodes and `EVIDENCES_CAPABILITY` with `inferred=true` and all provenance properties, MERGE on (project, capability, extractionVersion). Create constraint `capability_id` from this module (do not edit `neo4j_manager.py`). Tests: duplicate prevention, variants merge, ambiguity not merged, rerun with v2 keeps v1.
+**B1.1 Reuse Stage A contract**
+> Read the Stage A adapter contract, fixtures, and graph assumptions. Confirm what can be reused for capability extraction and which parts are intentionally still unsupported. Give the member a short summary of the contract and the missing pieces before creating any new module.
 
-**B4 Aggregation + adapter**
-> Implement `aggregation.py`: Author -> Projects -> evidence -> `HAS_CAPABILITY` with publicationCount, evidenceCount, avgExtractionConfidence, recentPublicationCount, firstSeenYear, lastSeenYear and configurable recency-weighted `score`. Minimum evidence from config; skip/flag `unknown_` authors; keep extraction confidence separate from author score. Implement `Neo4jAdapter.get_person_capabilities` and FakeAdapter data. Tests: multiple publications, repeated evidence, recency, confidence, versions.
+**B1.2 Capability models**
+> Create `src/capability/models.py` with the structured capability models and kind enum. Create `config/capability.yaml` with stoplist entries, threshold values, versioning defaults, recency settings, and minimum evidence rules. Explain why the stoplist is necessary and how the config keeps the behavior adjustable without hard-coding values.
 
-**B5 Requirements**
-> In `src/requirements/` implement extraction of `ProjectRequirements` from a `ProjectSpec` or an existing project via the adapter. LLM only proposes; map each requirement to `ResearchDomain` ids and `Capability` ids with the B3 resolver (unresolved ones kept by name, lower importance). Cache in `data/requirements/`. Tests: structured-output validation, generic/unsupported rejection, domain mapping, LLM-failure fallback.
+**B1.3 Normalization**
+> Implement `src/capability/normalization.py` for lowercase normalization, accent cleanup, whitespace handling, and deterministic English canonical slug generation. Add regression tests for normalization, stable IDs, and generic-term rejection. Report the specific behavior that changed and why it is needed for reliable capability merging.
+
+**B2.1 Extraction draft**
+> Implement `src/capability/extraction.py` as a structured extraction flow over title, abstract, keywords, and domain hierarchy. Explain what input context is used and why domain data is not converted into capabilities blindly. Keep the extraction logic independent of the recommender logic.
+
+**B2.2 LLM output validation**
+> Validate extraction output against malformed, unsupported, generic, and incomplete responses. Explain to the member which cases are blocked by design and how the system keeps invalid capability claims from entering the graph.
+
+**B2.3 Cache and CLI support**
+> Add disk cache keyed by project id, prompt version, and model, plus CLI flags for `--limit`, `--version`, `--dry-run`, and `--resume`. Explain why reproducibility and resumability matter for a long-running extraction pipeline.
+
+**B3.1 Capability resolution**
+> Implement `src/capability/resolution.py` with normalize → exact → alias → optional embedding similarity → create logic. Document each step and explain why conservative abbreviation handling is safer than aggressive merging.
+
+**B3.2 Persistence layer**
+> Implement `src/capability/repository.py` to write `Capability` nodes and `EVIDENCES_CAPABILITY` edges with provenance and `inferred=true` metadata. Merge only on the relevant identity tuple and explain the exact versioning strategy to the member before persisting results.
+
+**B3.3 Unique constraint and versioning**
+> Create the capability unique constraint in a stage-safe manner and verify that rerunning with a new version does not destroy or overwrite v1. Explain the test that proves v1 and v2 coexist.
+
+**B4.1 Author aggregation design**
+> Implement `src/capability/aggregation.py` to aggregate author-level capability evidence. Explain the metrics being calculated: publication count, evidence count, average confidence, recent count, and first/last seen year. Justify why extraction confidence is kept separate from author-level scoring.
+
+**B4.2 `unknown_` handling and minimum evidence**
+> Add filtering and flagging logic for placeholder authors and minimum-evidence rules. Explain to the member what this prevents and what the expected downstream behavior is.
+
+**B4.3 Adapter capability methods**
+> Implement `Neo4jAdapter.get_person_capabilities` and the corresponding fake-adapter fixture support. Explain what the adapter exposes and why this interface stays separate from raw graph details.
+
+**B5.1 Requirements data model**
+> Create the requirements models and data layout under `src/requirements/` and `data/requirements/`. Explain the difference between a project requirement and a published research domain and why they are not treated as the same object.
+
+**B5.2 Requirement extraction**
+> Implement requirement extraction from a `ProjectSpec` and/or an existing project using the adapter. The LLM only proposes; mapping to domains/capabilities must be deterministic and versioned. Explain exactly how unresolved requirements are kept lower-importance instead of being silently invented.
+
+**B5.3 Requirement fallback**
+> Add the domain-only fallback path when the LLM fails or produces unusable output. Explain why this is safe, what data is preserved, and what the system still cannot infer without evidence.
+
+**B5.4 Stage B validation**
+> Run the Stage B test set, then report the results to the member: what passed, what failed, what changed, and why the fix was necessary. Only continue once the gate is green.
 
 ---
 
@@ -130,20 +218,64 @@ While waiting (B on Days 1–2, C on Days 1–4): onboarding only — read the s
 - [x] Demo script runs on a real project.
 
 ### Copilot prompts — Stage C
-**C1 Gaps + candidates**
-> In `src/recommender/` implement `gaps.py` (required − covered capabilities, importance-weighted, from `ProjectRequirements` and members' `PersonCapability`) and `candidates.py` (domain/capability match through the adapter, excludes members, flags placeholder ids, bounded by config limits). Implement `Neo4jAdapter.find_candidates`, `get_candidate_evidence`, `get_coauthor_distance` with parameterised Cypher via the mapping. Tests on FakeAdapter fixtures, including empty gaps and missing capabilities.
 
-**C2 Features**
-> Implement `features.py` with the 7 features in spec §10.3 as pure functions in [0,1] (`gap_match`, `domain_relevance`, `semantic`, `complementarity`, `project_similarity` as weighted Tversky overlap, `graph` from co-author distance, `recency`). Document each formula in docstrings. Tests per feature, including missing data, and one case where the most similar person is not the best complement.
+For every micro-step below, do the following before moving on:
+1. Start from the validated Stage A/B outputs and explicitly list what is reused.
+2. Explain to the member: what was inspected, what changed, why the change is needed, and which assumptions remain open.
+3. Keep the work stage-scoped; do not silently change earlier modules.
+4. After each small change, run the relevant tests and report the outcome.
+5. If the ranking logic, explanation evidence, or LLM output is ambiguous, use the interactive AI agent to inspect the exact evidence and ask a tight clarifying question before proceeding.
 
-**C3 Ranking, evidence, CLI, evaluation**
-> Implement `ranking.py` reading `config/ranking.yaml` (default weights in spec §10.4): deterministic weighted score, stable tie-break by person_id, output with raw features, weights, contributions and evidence ids; scorer behind an interface. `evidence.py` retrieves per-candidate evidence. Add `src/recommend_cli.py` and `evaluation.py` (leave-one-author-out on projects with >= 3 authors, hit@k). Tests: determinism, weight-change effect, evidence retrieval.
+**C1.1 Reuse Stage A/B contracts**
+> Review the fact adapter, capability layer, and requirement outputs from earlier stages. Confirm what is safe to reuse, what is still missing, and how the ranker should depend only on the stable interfaces. Explain the reuse plan to the member before writing any code.
 
-**C4 GraphRAG**
-> In `src/rag/` build `context.py` (evidence subgraph limited by config) and `explain.py` (LangChain; prompt rules from spec §11). After generation, verify every cited id exists in the supplied context; otherwise discard and use a template explanation built from the ranking output. Tests: no invented ids, missing evidence acknowledged, LLM failure fallback, no Cypher exposed to the LLM.
+**C1.2 Gap computation**
+> Implement `src/recommender/gaps.py` to compute required minus covered capabilities, weighted by importance, using `ProjectRequirements` and members’ `PersonCapability` data. Explain the logic in plain terms: what counts as a gap, what counts as already covered, and why the current team is excluded from being treated as a candidate.
 
-**C5 Final run + docs**
-> Run the validation CLI and report on the full database, run evaluation, and update `docs/recommendation.md`, `data_flow.md`, `capability_semantics.md` and README (correct query scope and env vars). Write the demo script.
+**C1.3 Candidate generation**
+> Implement `src/recommender/candidates.py` using adapter data to find candidate researchers by domain and capability overlap while excluding current members and flagging placeholder IDs. Keep the search bounded by config limits and explain the reason for the cutoff.
+
+**C1.4 Adapter methods for candidate search**
+> Implement the remaining adapter methods (`find_candidates`, `get_candidate_evidence`, `get_coauthor_distance`) with parameterised Cypher and explain which graph facts they rely on. Add focused tests on FakeAdapter fixtures covering empty gaps, missing capabilities, and placeholder authors.
+
+**C2.1 Feature definitions**
+> Implement `src/recommender/features.py` with the seven required features: `gap_match`, `domain_relevance`, `semantic`, `complementarity`, `project_similarity`, `graph`, and `recency`. Document each formula in the docstrings and explain the purpose of each feature to the member before validating the math.
+
+**C2.2 Feature tests**
+> Add per-feature unit tests, including missing-data handling and one case where the most similar person is not the best complement. Explain the failure mode and why complementarity matters more than raw similarity in some cases.
+
+**C3.1 Ranking design**
+> Implement `src/recommender/ranking.py` and read `config/ranking.yaml` to compute the weighted score. Make the ranker deterministic, with a stable tie-break on `person_id`, and expose raw features, weights, contributions, and supporting evidence IDs. Explain how the weights map to the specification and why the output must be auditable.
+
+**C3.2 Evidence retrieval**
+> Implement `src/recommender/evidence.py` to fetch per-candidate evidence and package it for ranking output. Explain which evidence is necessary for a defensible recommendation and which parts are only supportive context.
+
+**C3.3 CLI and evaluation**
+> Add `src/recommend_cli.py` and `evaluation.py` for project-based recommendation and leave-one-author-out evaluation on projects with at least three authors. Report the evaluation logic to the member and explain how hit@k is being used as a sanity check, not as ground truth.
+
+**C3.4 Ranking validation**
+> Run deterministic ranking tests and a weight-change check. Explain to the member whether the new ordering matches the intended prioritization and why that is or is not expected.
+
+**C4.1 Evidence-context builder**
+> Implement `src/rag/context.py` to collect and limit the candidate evidence subgraph according to config. Explain which IDs are included and why the context must be bounded to avoid noisy or irrelevant evidence.
+
+**C4.2 Explanation generation**
+> Implement `src/rag/explain.py` with the grounded explanation flow. The prompt must instruct the model to use only supplied evidence and must forbid invented skills, projects, affiliations, or relationships. Explain to the member what the LLM is allowed to say and what is intentionally blocked.
+
+**C4.3 Citation validation**
+> After generation, verify every cited ID is present in the supplied context. If a citation is unknown, discard it and fall back to a template explanation derived from the ranking output. Explain the reasoning behind this safeguard and why it prevents hallucinated recommendations.
+
+**C4.4 LLM failure handling**
+> Add failure paths for missing LLM output, missing embeddings, missing data, and Neo4j errors. Explain what fallback behavior is expected and how the system preserves user trust even when the assistive component fails.
+
+**C5.1 Final validation run**
+> Run the full validation CLI and report the outputs for the database or dev subset. Explain what was checked and what the result means for the final recommendation system.
+
+**C5.2 Final documentation update**
+> Update `docs/recommendation.md`, `data_flow.md`, `capability_semantics.md`, and the README so they describe the correct current state, including query scope and env configuration. Explain what changed and why the docs must remain aligned with the actual implementation.
+
+**C5.3 Demo script and final gate review**
+> Write the demo script and run the final Stage C review against the definition of done. Report the final status to the member in a short checklist: what is implemented, what is validated, what remains intentionally out of scope, and what assumptions still need human confirmation.
 
 ---
 

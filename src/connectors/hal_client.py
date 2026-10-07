@@ -50,8 +50,14 @@ class HalClient:
     with urlopen(url, timeout=30) as response:
       return json.loads(response.read().decode("utf-8"))
 
-  def fetch_publications(self, query=None, max_rows=None, rows_per_page=None):
-    """Fetches HAL publications using the configured field list."""
+  def fetch_publications(
+      self,
+      query=None,
+      max_rows=None,
+      rows_per_page=None,
+      sort=None,
+  ):
+    """Fetch HAL publications, optionally sorting for stable offset paging."""
     start = 0
     all_docs = []
     query = query or self.query
@@ -74,6 +80,8 @@ class HalClient:
           "start": start,
           "wt": "json",
       }
+      if sort:
+        params["sort"] = sort
 
       data = self._get_json(params)["response"]
       num_found = data["numFound"]
