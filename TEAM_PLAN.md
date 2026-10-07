@@ -124,13 +124,14 @@ For every micro-step below, do the following before moving on:
 5. Requirements extraction (`ProjectSpec` or `halId` -> `ProjectRequirements`, mapped to domains/capabilities, JSON cache, domain-only fallback on LLM failure).
 6. `Neo4jAdapter.get_person_capabilities` and `FakeAdapter` capability fixtures.
 
-**Gate 2 -> C**
-- [ ] `unittest` green without LLM key or Neo4j (fake LLM, fake adapter).
-- [ ] Dev DB contains capabilities v1 with provenance; manual review of ~30 projects recorded in `docs/capability_semantics.md` (precision notes, stoplist tuning).
-- [ ] v1 and v2 coexist (test).
-- [ ] `tests/fixtures/capabilities.json` and `tests/fixtures/requirements.json` committed (>= 10 projects each).
-- [ ] 3 example `ProjectRequirements` JSON files in `data/requirements/examples/`.
-- [ ] Cost/time note: how to run the full extraction and how long it took on the dev subset.
+**Gate 2 -> C (COMPLETED)**
+- [x] `unittest` green without LLM key or Neo4j (fake LLM, fake adapter).
+- [x] Dev DB contains capabilities v1 with provenance; manual review of ~30 projects recorded in `docs/capability_semantics.md` (precision notes, stoplist tuning).
+- [x] v1 and v2 coexist (test).
+- [x] `tests/fixtures/capabilities.json` and `tests/fixtures/requirements.json` committed (>= 10 projects each).
+- [x] 3 example `ProjectRequirements` JSON files in `data/requirements/examples/`.
+- [x] Cost/time note: how to run the full extraction and how long it took on the dev subset.
+
 
 **Handoff pack:** merged PR, fixtures, examples, capability docs, instructions to run the full extraction (C launches it in the background on Day 5).
 
@@ -208,13 +209,13 @@ For every micro-step below, do the following before moving on:
 4. GraphRAG `context.py` + `explain.py` with citation check and template fallback.
 5. Full-data run: rerun A's validation/report, final quality report; final docs; README corrected (query scope, env vars).
 
-**Gate 3 = Definition of done**
-- [ ] `unittest` green; validation CLI runs independently of the recommender.
-- [ ] Recommendation output shows features, weights, contributions, evidence ids.
-- [ ] Every explanation sentence traces to supplied evidence ids; unknown ids rejected; LLM failure falls back to template.
-- [ ] Capabilities carry provenance; v1/v2 coexistence documented.
-- [ ] Docs state what comes from HAL vs what is inferred.
-- [ ] Demo script runs on a real project.
+**Gate 3 = Definition of done (COMPLETED)**
+- [x] `unittest` green; validation CLI runs independently of the recommender.
+- [x] Recommendation output shows features, weights, contributions, evidence ids.
+- [x] Every explanation sentence traces to supplied evidence ids; unknown ids rejected; LLM failure falls back to template.
+- [x] Capabilities carry provenance; v1/v2 coexistence documented.
+- [x] Docs state what comes from HAL vs what is inferred.
+- [x] Demo script runs on a real project.
 
 ### Copilot prompts — Stage C
 

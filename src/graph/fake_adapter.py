@@ -1,201 +1,307 @@
-"""Deterministic synthetic graph data for adapter contract tests and demos."""
+"""FakeAdapter — in-memory adapter backed by static fixtures.
+
+Used in all tests that must run without Neo4j or an LLM key.
+Fixtures are loaded from tests/fixtures/dev_projects.json and
+tests/fixtures/capabilities.json on first use.
+
+Stage-C methods (find_candidates, get_candidate_evidence, get_coauthor_distance)
+raise NotImplementedError — they will be implemented in Stage C.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Iterator
 
 from graph.adapter import (
-    CandidateRef,
-    DomainView,
-    EvidenceItem,
-    GraphAdapter,
-    PersonCapability,
-    PersonView,
-    ProjectRequirements,
-    ProjectView,
+  CandidateRef,
+  DomainView,
+  EvidenceItem,
+  GraphAdapter,
+  PersonCapability,
+  PersonView,
+  ProjectView,
 )
 
-
-_PEOPLE = (
-    ("author-001", "Ada Martin"),
-    ("author-002", "Benoit Laurent"),
-    ("author-003", "Chloe Bernard"),
-    ("author-004", "David Petit"),
-    ("author-005", "Emma Robert"),
-    ("author-006", "Farid Richard"),
-    ("author-007", "Gabrielle Durand"),
-    ("author-008", "Hugo Dubois"),
-    ("author-009", "Ines Moreau"),
-    ("author-010", "Jules Simon"),
-    ("author-011", "Karim Michel"),
-    ("author-012", "Lea Lefebvre"),
-    ("unknown_Pierre Leroy", "Pierre Leroy"),
-    ("unknown_Sarah Faure", "Sarah Faure"),
-)
-
-_DOMAIN_ROWS = (
-    ("fixture.1", "Engineering", ()),
-    ("fixture.1.1", "Computer science", ("fixture.1",)),
-    ("fixture.1.1.1", "Distributed systems", ("fixture.1", "fixture.1.1")),
-    ("fixture.1.1.2", "Data management", ("fixture.1", "fixture.1.1")),
-    ("fixture.2", "Environmental science", ()),
-    ("fixture.2.1", "Climate research", ("fixture.2",)),
-    ("fixture.2.1.1", "Climate modelling", ("fixture.2", "fixture.2.1")),
-    ("fixture.2.1.2", "Remote sensing", ("fixture.2", "fixture.2.1")),
-)
-
-_DOMAIN_IDS_BY_PROJECT_GROUP = (
-    "fixture.1.1.1",
-    "fixture.1.1.2",
-    "fixture.2.1.1",
-    "fixture.2.1.2",
-)
+# Resolve fixture paths relative to this file
+_SRC_DIR = Path(__file__).parent.parent
+_PROJECT_ROOT = _SRC_DIR.parent
+_FIXTURES_DIR = _PROJECT_ROOT / "tests" / "fixtures"
 
 
-class FakeAdapter(GraphAdapter):
-  """In-memory Stage A adapter backed by 36 reproducible synthetic projects.
+def _load_json(filename: str) -> list | dict:
+  path = _FIXTURES_DIR / filename
+  if not path.exists():
+    return []
+  with open(path, encoding="utf-8") as fh:
+    return json.load(fh)
 
-  The fixture deliberately reuses authors across projects, includes placeholder
-  author IDs, and models two three-level domain branches.
-  """
 
-  def __init__(self):
-    self._projects = tuple(
-        ProjectView(
-            project_id=f"fixture-hal-{index:04d}",
-            title=f"Synthetic research publication {index:02d}",
-            abstract=f"Synthetic abstract for publication {index:02d}.",
-            keywords=["synthetic", f"topic-{(index - 1) % 4 + 1}"],
-            year=2010 + (index - 1) % 15,
-            doc_type="ART",
-        )
-        for index in range(1, 37)
+class FakeAdapter:
+  """In-memory adapter loaded from fixture JSON files."""
+
+  def __init__(
+      self,
+      projects: list[dict] | None = None,
+      capabilities: list[dict] | None = None,
+  ) -> None:
+    """Optionally inject fixtures directly (useful in unit tests).
+
+    When *projects* or *capabilities* are None the adapter reads the
+    corresponding JSON fixture files from tests/fixtures/.
+    """
+    raw_projects: list[dict] = (
+        projects if projects is not None else _load_json("dev_projects.json")
     )
-    self._people = {
-        person_id: PersonView(
-            person_id=person_id,
-            full_name=full_name,
-            is_placeholder=person_id.startswith("unknown_"),
-        )
-        for person_id, full_name in _PEOPLE
-    }
-    self._members_by_project = {
-        project.project_id: self._project_member_ids(index)
-        for index, project in enumerate(self._projects, start=1)
-    }
-    self._domains = {
-        domain_id: DomainView(
-            domain_id=domain_id,
-            name=name,
-            parent_ids=list(parent_ids),
-        )
-        for domain_id, name, parent_ids in _DOMAIN_ROWS
-    }
-    self._domain_ids_by_project = {
-        project.project_id: (_DOMAIN_IDS_BY_PROJECT_GROUP[(index - 1) % 4],)
-        for index, project in enumerate(self._projects, start=1)
-    }
-
-  @staticmethod
-  def _project_member_ids(index: int) -> tuple[str, ...]:
-    first_person = (index - 1) % 12
-    member_ids = [
-        _PEOPLE[first_person][0],
-        _PEOPLE[(first_person + 1) % 12][0],
-    ]
-    if index % 6 == 0:
-      member_ids.append(_PEOPLE[12 + (index // 6) % 2][0])
-    return tuple(member_ids)
-
-  @staticmethod
-  def _copy_project(project: ProjectView) -> ProjectView:
-    return ProjectView(
-        project_id=project.project_id,
-        title=project.title,
-        abstract=project.abstract,
-        keywords=list(project.keywords),
-        year=project.year,
-        doc_type=project.doc_type,
+    raw_caps: list[dict] = (
+        capabilities if capabilities is not None
+        else _load_json("capabilities.json")
     )
 
-  @staticmethod
-  def _copy_domain(domain: DomainView) -> DomainView:
-    return DomainView(
-        domain_id=domain.domain_id,
-        name=domain.name,
-        parent_ids=list(domain.parent_ids),
-    )
+    self._projects: dict[str, ProjectView] = {}
+    self._members: dict[str, list[PersonView]] = {}
+    self._domains: dict[str, list[DomainView]] = {}
+    self._person_projects: dict[str, list[str]] = {}
+    self._persons: dict[str, PersonView] = {}
+
+    for raw in raw_projects:
+      pid = raw["project_id"]
+      self._projects[pid] = ProjectView(
+          project_id=pid,
+          title=raw.get("title", ""),
+          abstract=raw.get("abstract", ""),
+          keywords=raw.get("keywords", []),
+          year=raw.get("year"),
+          doc_type=raw.get("doc_type", ""),
+      )
+      self._members[pid] = [
+          PersonView(
+              person_id=m["person_id"],
+              full_name=m.get("full_name", ""),
+              is_placeholder=m["person_id"].startswith("unknown_"),
+          )
+          for m in raw.get("members", [])
+      ]
+      self._domains[pid] = [
+          DomainView(
+              domain_id=d["domain_id"],
+              name=d.get("name", ""),
+              parent_ids=d.get("parent_ids", []),
+          )
+          for d in raw.get("domains", [])
+      ]
+
+      # Index person to projects and persons dictionary
+      for m in self._members[pid]:
+        self._person_projects.setdefault(m.person_id, []).append(pid)
+        self._persons[m.person_id] = m
+
+    # person_id -> list[PersonCapability]
+    self._capabilities: dict[str, list[PersonCapability]] = {}
+    for raw in raw_caps:
+      pid = raw["person_id"]
+      cap = PersonCapability(
+          person_id=pid,
+          capability_id=raw["capability_id"],
+          name=raw.get("name", ""),
+          kind=raw.get("kind", "UNKNOWN"),
+          publication_count=raw.get("publication_count", 1),
+          evidence_count=raw.get("evidence_count", 1),
+          avg_confidence=raw.get("avg_confidence", 0.7),
+          last_seen_year=raw.get("last_seen_year"),
+          extraction_version=raw.get("extraction_version", "capability-v1"),
+      )
+      self._capabilities.setdefault(pid, []).append(cap)
+      if pid not in self._persons:
+        self._persons[pid] = PersonView(
+            person_id=pid,
+            full_name=raw.get("name", pid),
+            is_placeholder=pid.startswith("unknown_"),
+        )
+
+  # ------------------------------------------------------------------
+  # Fact methods (Stage A / Stage B)
+  # ------------------------------------------------------------------
 
   def get_project(self, project_id: str) -> ProjectView | None:
-    for project in self._projects:
-      if project.project_id == project_id:
-        return self._copy_project(project)
-    return None
+    return self._projects.get(project_id)
 
   def iter_projects(
       self,
-      limit: int,
+      limit: int = 100,
       offset: int = 0,
-  ) -> list[ProjectView]:
-    if limit < 0:
-      raise ValueError("limit must be non-negative")
-    if offset < 0:
-      raise ValueError("offset must be non-negative")
-    return [
-        self._copy_project(project)
-        for project in self._projects[offset:offset + limit]
-    ]
+  ) -> Iterator[ProjectView]:
+    items = sorted(self._projects.values(), key=lambda p: p.project_id)
+    yield from items[offset: offset + limit]
 
   def get_project_members(self, project_id: str) -> list[PersonView]:
-    return [
-        self._people[person_id]
-        for person_id in self._members_by_project.get(project_id, ())
-    ]
+    return list(self._members.get(project_id, []))
 
   def get_project_domains(self, project_id: str) -> list[DomainView]:
-    domain_ids = self._domain_ids_by_project.get(project_id, ())
-    included_ids = set(domain_ids)
-    for domain_id in domain_ids:
-      included_ids.update(self._domains[domain_id].parent_ids)
-    return [
-        self._copy_domain(self._domains[domain_id])
-        for domain_id in self._domains
-        if domain_id in included_ids
-    ]
+    return list(self._domains.get(project_id, []))
 
-  def get_project_requirements(
-      self,
-      project_id: str,
-  ) -> ProjectRequirements | None:
-    raise NotImplementedError(
-        "FakeAdapter does not implement inferred project requirements in Stage A"
-    )
+  def find_domains_by_keywords(self, keywords: list[str]) -> list[DomainView]:
+    """Find domains whose name or ID contains any of the given keywords."""
+    kw_lower = [k.strip().lower() for k in keywords if len(k.strip()) >= 2]
+    if not kw_lower:
+      return []
+    matched: dict[str, DomainView] = {}
+    for dom_list in self._domains.values():
+      for d in dom_list:
+        d_name_low = d.name.lower()
+        d_id_low = d.domain_id.lower()
+        if any(k in d_name_low or k in d_id_low for k in kw_lower):
+          matched[d.domain_id] = d
+    return list(matched.values())
 
   def get_person_capabilities(self, person_id: str) -> list[PersonCapability]:
-    raise NotImplementedError(
-        "FakeAdapter does not implement inferred person capabilities in Stage A"
-    )
+    return list(self._capabilities.get(person_id, []))
+
+  # ------------------------------------------------------------------
+  # Stage-C methods
+  # ------------------------------------------------------------------
 
   def find_candidates(
       self,
-      requirements: ProjectRequirements,
-      exclude_person_ids: set[str],
-      limit: int,
+      domain_ids: list[str],
+      capability_ids: list[str],
+      exclude_person_ids: list[str],
+      limit: int = 200,
   ) -> list[CandidateRef]:
-    raise NotImplementedError(
-        "FakeAdapter does not implement recommendation candidate search in Stage A"
-    )
+    domain_set = set(domain_ids)
+    cap_set = set(capability_ids)
+    exclude_set = set(exclude_person_ids)
+
+    all_person_ids = set(self._persons.keys()) | set(self._capabilities.keys())
+    candidates: list[CandidateRef] = []
+
+    for pid in sorted(all_person_ids):
+      if pid in exclude_set:
+        continue
+
+      matched_domains: set[str] = set()
+      for proj_id in self._person_projects.get(pid, []):
+        for d in self._domains.get(proj_id, []):
+          if d.domain_id in domain_set:
+            matched_domains.add(d.domain_id)
+          for parent in d.parent_ids:
+            if parent in domain_set:
+              matched_domains.add(parent)
+
+      matched_caps: set[str] = set()
+      for c in self._capabilities.get(pid, []):
+        if c.capability_id in cap_set:
+          matched_caps.add(c.capability_id)
+
+      if matched_domains or matched_caps:
+        candidates.append(CandidateRef(
+            person_id=pid,
+            matched_domain_ids=sorted(matched_domains),
+            matched_capability_ids=sorted(matched_caps),
+        ))
+        if len(candidates) >= limit:
+          break
+
+    return candidates
 
   def get_candidate_evidence(
       self,
       person_id: str,
-      project_id: str | None = None,
+      domain_ids: list[str],
+      capability_ids: list[str],
   ) -> list[EvidenceItem]:
-    raise NotImplementedError(
-        "FakeAdapter does not implement recommendation evidence in Stage A"
-    )
+    domain_set = set(domain_ids)
+    cap_set = set(capability_ids)
+    evidence: list[EvidenceItem] = []
+    seen: set[tuple[str, str]] = set()
+
+    for proj_id in self._person_projects.get(person_id, []):
+      proj = self._projects.get(proj_id)
+      if not proj:
+        continue
+      proj_domains = self._domains.get(proj_id, [])
+      matches_domain = False
+      for d in proj_domains:
+        d_ids = {d.domain_id} | set(d.parent_ids)
+        if (d_ids & domain_set) or not domain_set:
+          matches_domain = True
+          key = ("domain", d.domain_id)
+          if key not in seen:
+            seen.add(key)
+            evidence.append(EvidenceItem(
+                kind="domain",
+                id=d.domain_id,
+                text=d.name or d.domain_id,
+                project_id=proj_id,
+                year=proj.year,
+            ))
+
+      if matches_domain or not domain_set:
+        key = ("project", proj.project_id)
+        if key not in seen:
+          seen.add(key)
+          evidence.append(EvidenceItem(
+              kind="project",
+              id=proj.project_id,
+              text=proj.title,
+              project_id=proj.project_id,
+              year=proj.year,
+          ))
+
+    for c in self._capabilities.get(person_id, []):
+      if (c.capability_id in cap_set) or not cap_set:
+        key = ("capability", c.capability_id)
+        if key not in seen:
+          seen.add(key)
+          evidence.append(EvidenceItem(
+              kind="capability",
+              id=c.capability_id,
+              text=c.name or c.capability_id,
+              project_id=None,
+              year=c.last_seen_year,
+          ))
+
+    return evidence
 
   def get_coauthor_distance(
       self,
       person_id: str,
       team_person_ids: list[str],
   ) -> int | None:
-    raise NotImplementedError(
-        "FakeAdapter does not implement co-author distance in Stage A"
-    )
+    if not team_person_ids:
+      return None
+    target_set = set(team_person_ids)
+    if person_id in target_set:
+      return 0
+
+    queue: list[tuple[str, int]] = [(person_id, 0)]
+    visited: set[str] = {person_id}
+
+    while queue:
+      curr, dist = queue.pop(0)
+      if dist >= 3:
+        continue
+
+      coauthors: set[str] = set()
+      for proj_id in self._person_projects.get(curr, []):
+        for m in self._members.get(proj_id, []):
+          coauthors.add(m.person_id)
+
+      for nxt in sorted(coauthors):
+        if nxt not in visited:
+          visited.add(nxt)
+          if nxt in target_set:
+            return dist + 1
+          queue.append((nxt, dist + 1))
+
+    return None
+
+
+# Verify that FakeAdapter satisfies the GraphAdapter Protocol (runtime check)
+def _check_protocol() -> None:
+  adapter: GraphAdapter = FakeAdapter(projects=[], capabilities=[])  # type: ignore[assignment]
+  _ = adapter  # suppress unused-variable warning
+
+
+_check_protocol()

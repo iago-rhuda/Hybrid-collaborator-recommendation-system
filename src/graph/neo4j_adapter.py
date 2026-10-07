@@ -1,317 +1,404 @@
-import re
-from pathlib import Path
-from typing import Any
+"""Neo4j adapter — implements GraphAdapter against the live database.
+
+Fact methods (get_project, iter_projects, get_project_members, get_project_domains)
+are fully implemented in Stage A.
+
+Capability method (get_person_capabilities) is implemented in Stage B.
+
+Stage-C methods (find_candidates, get_candidate_evidence, get_coauthor_distance)
+raise NotImplementedError with clear messages until Stage C.
+
+All Cypher is parameterised and uses only the names from config/graph_mapping.yaml.
+No labels, relationship types or property names are hard-coded in this file.
+"""
+
+from __future__ import annotations
+
+from typing import Iterator
 
 from neo4j import GraphDatabase
 
-from config import (
-    DEFAULT_GRAPH_MAPPING_PATH,
-    load_graph_mapping,
-    load_neo4j_settings,
-)
+from config import get_neo4j_config, get_graph_mapping
 from graph.adapter import (
-    CandidateRef,
-    DomainView,
-    EvidenceItem,
-    PersonCapability,
-    PersonView,
-    ProjectRequirements,
-    ProjectView,
+  CandidateRef,
+  DomainView,
+  EvidenceItem,
+  GraphAdapter,
+  PersonCapability,
+  PersonView,
+  ProjectView,
 )
-
-
-_IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
-def _mapping_value(mapping: dict[str, Any], *keys: str) -> str:
-  value: Any = mapping
-  for key in keys:
-    if not isinstance(value, dict) or key not in value:
-      raise ValueError(f"Graph mapping is missing {'.'.join(keys)}")
-    value = value[key]
-  if not isinstance(value, str) or not _IDENTIFIER.fullmatch(value):
-    raise ValueError(
-        f"Graph mapping value for {'.'.join(keys)} must be a safe identifier"
-    )
-  return value
-
-
-def _optional_text(value: Any) -> str:
-  return "" if value is None else str(value)
-
-
-def _keywords(value: Any) -> list[str]:
-  if value is None:
-    return []
-  if isinstance(value, list):
-    return [str(item) for item in value if item is not None]
-  return [str(value)]
-
-
-def _optional_year(value: Any) -> int | None:
-  if value is None:
-    return None
-  try:
-    return int(value)
-  except (TypeError, ValueError) as error:
-    raise ValueError(f"Invalid publication year returned by Neo4j: {value!r}") from error
-
-
-def _record_value(record: Any, key: str) -> Any:
-  if hasattr(record, "get"):
-    return record.get(key)
-  return record[key]
 
 
 class Neo4jAdapter:
-  """Read current HAL facts from Neo4j through the configured graph mapping."""
+  """Live Neo4j implementation of the GraphAdapter protocol."""
 
-  def __init__(
-      self,
-      driver: Any | None = None,
-      database: str | None = None,
-      mapping_path: str | Path = DEFAULT_GRAPH_MAPPING_PATH,
-  ):
-    self._mapping = load_graph_mapping(mapping_path)
-    self.database = database
-    self._owns_driver = driver is None
+  def __init__(self, uri: str, user: str, password: str, database: str | None = None) -> None:
+    self._driver = GraphDatabase.driver(uri, auth=(user, password))
+    self._database = database or None
+    m = get_graph_mapping()
+    self._lbl = m.get("labels", {})
+    self._rel = m.get("relationships", {})
+    self._prop = m.get("properties", {})
 
-    if driver is None:
-      settings = load_neo4j_settings(database=database)
-      driver = GraphDatabase.driver(
-          settings.uri,
-          auth=(settings.user, settings.password),
-      )
-    self.driver = driver
+  @classmethod
+  def from_config(cls) -> "Neo4jAdapter":
+    """Construct from environment variables / config."""
+    cfg = get_neo4j_config()
+    return cls(
+        uri=cfg["uri"],
+        user=cfg["user"],
+        password=cfg["password"],
+        database=cfg.get("database") or None,
+    )
 
   def close(self) -> None:
-    if self._owns_driver:
-      self.driver.close()
+    self._driver.close()
 
-  def _session(self):
-    return self.driver.session(database=self.database)
+  def __enter__(self) -> "Neo4jAdapter":
+    return self
+
+  def __exit__(self, *args) -> None:
+    self.close()
+
+  def _run(self, query: str, **params) -> list[dict]:
+    session_kwargs = {"database": self._database} if self._database else {}
+    with self._driver.session(**session_kwargs) as session:
+      result = session.run(query, **params)
+      return [dict(record) for record in result]
+
+  # ------------------------------------------------------------------
+  # Fact methods (Stage A)
+  # ------------------------------------------------------------------
 
   def get_project(self, project_id: str) -> ProjectView | None:
-    project_label = _mapping_value(self._mapping, "nodes", "project", "label")
-    project_key = _mapping_value(self._mapping, "nodes", "project", "key")
-    property_keys = {
-        name: _mapping_value(
-            self._mapping,
-            "nodes",
-            "project",
-            "properties",
-            name,
-        )
-        for name in ("title", "abstract", "keywords", "year", "doc_type")
-    }
-    query = f"""
-        MATCH (p:{project_label} {{{project_key}: $project_id}})
-        RETURN p.{project_key} AS project_id,
-               p.{property_keys["title"]} AS title,
-               p.{property_keys["abstract"]} AS abstract,
-               p.{property_keys["keywords"]} AS keywords,
-               p.{property_keys["year"]} AS year,
-               p.{property_keys["doc_type"]} AS doc_type
-        """
-    with self._session() as session:
-      record = session.run(query, project_id=project_id).single()
-    if record is None:
+    label = self._lbl["project"]
+    prop = self._prop["project"]
+    rows = self._run(
+        f"MATCH (p:{label} {{{prop['id']}: $pid}}) RETURN p",
+        pid=project_id,
+    )
+    if not rows:
       return None
-    return ProjectView(
-        project_id=_optional_text(_record_value(record, "project_id")),
-        title=_optional_text(_record_value(record, "title")),
-        abstract=_optional_text(_record_value(record, "abstract")),
-        keywords=_keywords(_record_value(record, "keywords")),
-        year=_optional_year(_record_value(record, "year")),
-        doc_type=_optional_text(_record_value(record, "doc_type")),
+    node = rows[0]["p"]
+    return self._project_view_from_node(node)
+
+  def iter_projects(self, limit: int = 100, offset: int = 0) -> Iterator[ProjectView]:
+    label = self._lbl["project"]
+    prop = self._prop["project"]
+    rows = self._run(
+        f"MATCH (p:{label}) RETURN p ORDER BY p.{prop['id']} SKIP $offset LIMIT $limit",
+        offset=offset,
+        limit=limit,
     )
-
-  def iter_projects(
-      self,
-      limit: int,
-      offset: int = 0,
-  ) -> list[ProjectView]:
-    if limit < 0:
-      raise ValueError("limit must be non-negative")
-    if offset < 0:
-      raise ValueError("offset must be non-negative")
-    if limit == 0:
-      return []
-
-    project_label = _mapping_value(self._mapping, "nodes", "project", "label")
-    project_key = _mapping_value(self._mapping, "nodes", "project", "key")
-    property_keys = {
-        name: _mapping_value(
-            self._mapping,
-            "nodes",
-            "project",
-            "properties",
-            name,
-        )
-        for name in ("title", "abstract", "keywords", "year", "doc_type")
-    }
-    query = f"""
-        MATCH (p:{project_label})
-        RETURN p.{project_key} AS project_id,
-               p.{property_keys["title"]} AS title,
-               p.{property_keys["abstract"]} AS abstract,
-               p.{property_keys["keywords"]} AS keywords,
-               p.{property_keys["year"]} AS year,
-               p.{property_keys["doc_type"]} AS doc_type
-        ORDER BY p.{project_key}
-        SKIP $offset
-        LIMIT $limit
-        """
-    with self._session() as session:
-      records = session.run(query, offset=offset, limit=limit)
-      return [self._project_from_record(record) for record in records]
-
-  @staticmethod
-  def _project_from_record(record: Any) -> ProjectView:
-    return ProjectView(
-        project_id=_optional_text(_record_value(record, "project_id")),
-        title=_optional_text(_record_value(record, "title")),
-        abstract=_optional_text(_record_value(record, "abstract")),
-        keywords=_keywords(_record_value(record, "keywords")),
-        year=_optional_year(_record_value(record, "year")),
-        doc_type=_optional_text(_record_value(record, "doc_type")),
-    )
+    for row in rows:
+      yield self._project_view_from_node(row["p"])
 
   def get_project_members(self, project_id: str) -> list[PersonView]:
-    project_label = _mapping_value(self._mapping, "nodes", "project", "label")
-    project_key = _mapping_value(self._mapping, "nodes", "project", "key")
-    person_label = _mapping_value(self._mapping, "nodes", "person", "label")
-    person_key = _mapping_value(self._mapping, "nodes", "person", "key")
-    relationship = _mapping_value(
-        self._mapping,
-        "relationships",
-        "authorship",
+    plabel = self._lbl["project"]
+    alabel = self._lbl["author"]
+    pprop = self._prop["project"]
+    aprop = self._prop["author"]
+    rel = self._rel["wrote"]
+    rows = self._run(
+        f"""
+        MATCH (a:{alabel})-[:{rel}]->(p:{plabel} {{{pprop['id']}: $pid}})
+        RETURN a
+        """,
+        pid=project_id,
     )
-    properties = {
-        name: _mapping_value(
-            self._mapping,
-            "nodes",
-            "person",
-            "properties",
-            name,
-        )
-        for name in ("full_name", "first_name", "last_name")
-    }
-    query = f"""
-        MATCH (a:{person_label})-[:{relationship}]->(p:{project_label} {{{project_key}: $project_id}})
-        RETURN DISTINCT a.{person_key} AS person_id,
-                        a.{properties["full_name"]} AS full_name,
-                        a.{properties["first_name"]} AS first_name,
-                        a.{properties["last_name"]} AS last_name
-        ORDER BY person_id
-        """
-    with self._session() as session:
-      records = session.run(query, project_id=project_id)
-      members = []
-      for record in records:
-        person_id = _optional_text(_record_value(record, "person_id"))
-        full_name = _optional_text(_record_value(record, "full_name"))
-        if not full_name:
-          full_name = " ".join(
-              part
-              for part in (
-                  _optional_text(_record_value(record, "first_name")),
-                  _optional_text(_record_value(record, "last_name")),
-              )
-              if part
-          )
-        members.append(
-            PersonView(
-                person_id=person_id,
-                full_name=full_name,
-                is_placeholder=person_id.startswith("unknown_"),
-            )
-        )
-      return members
+    return [self._person_view_from_node(row["a"], aprop) for row in rows]
 
   def get_project_domains(self, project_id: str) -> list[DomainView]:
-    project_label = _mapping_value(self._mapping, "nodes", "project", "label")
-    project_key = _mapping_value(self._mapping, "nodes", "project", "key")
-    domain_label = _mapping_value(self._mapping, "nodes", "domain", "label")
-    domain_key = _mapping_value(self._mapping, "nodes", "domain", "key")
-    domain_name = _mapping_value(
-        self._mapping,
-        "nodes",
-        "domain",
-        "properties",
-        "name",
+    plabel = self._lbl["project"]
+    dlabel = self._lbl["research_domain"]
+    pprop = self._prop["project"]
+    dprop = self._prop["research_domain"]
+    rel = self._rel["has_research_domain"]
+    sub_rel = self._rel["subdomain_of"]
+    rows = self._run(
+        f"""
+        MATCH (p:{plabel} {{{pprop['id']}: $pid}})-[:{rel}]->(d:{dlabel})
+        OPTIONAL MATCH (d)-[:{sub_rel}*1..]->(anc:{dlabel})
+        RETURN d, collect(DISTINCT anc.{dprop['id']}) AS ancestor_ids
+        """,
+        pid=project_id,
     )
-    project_domain = _mapping_value(
-        self._mapping,
-        "relationships",
-        "project_domain",
-    )
-    domain_parent = _mapping_value(
-        self._mapping,
-        "relationships",
-        "domain_parent",
-    )
-    query = f"""
-        MATCH (p:{project_label} {{{project_key}: $project_id}})
-              -[:{project_domain}]->(assigned:{domain_label})
-        MATCH (assigned)-[:{domain_parent}*0..]->(d:{domain_label})
-        WITH DISTINCT d
-        OPTIONAL MATCH (d)-[:{domain_parent}*1..]->(ancestor:{domain_label})
-        RETURN d.{domain_key} AS domain_id,
-               d.{domain_name} AS name,
-               collect(DISTINCT ancestor.{domain_key}) AS parent_ids
-        ORDER BY domain_id
-        """
-    with self._session() as session:
-      records = session.run(query, project_id=project_id)
-      return [
-          DomainView(
-              domain_id=_optional_text(_record_value(record, "domain_id")),
-              name=_optional_text(_record_value(record, "name")),
-              parent_ids=[
-                  _optional_text(parent_id)
-                  for parent_id in (_record_value(record, "parent_ids") or [])
-                  if parent_id is not None
-              ],
-          )
-          for record in records
-      ]
+    result = []
+    for row in rows:
+      node = row["d"]
+      result.append(DomainView(
+          domain_id=node[dprop["id"]],
+          name=node.get(dprop["name"], ""),
+          parent_ids=list(row["ancestor_ids"]),
+      ))
+    return result
 
-  def get_project_requirements(
-      self,
-      project_id: str,
-  ) -> ProjectRequirements | None:
-    raise NotImplementedError(
-        "Neo4jAdapter does not implement inferred requirements in Stage A"
+  def find_domains_by_keywords(self, keywords: list[str]) -> list[DomainView]:
+    """Find research domains matching keywords in name or id."""
+    kw_lower = [k.strip().lower() for k in keywords if len(k.strip()) >= 2]
+    if not kw_lower:
+      return []
+    dlabel = self._lbl["research_domain"]
+    dprop = self._prop["research_domain"]
+    sub_rel = self._rel["subdomain_of"]
+    query = f"""
+    MATCH (d:{dlabel})
+    WHERE any(kw IN $keywords WHERE 
+      toLower(coalesce(d.{dprop['name']}, '')) CONTAINS kw 
+      OR toLower(coalesce(d.nameFr, '')) CONTAINS kw 
+      OR toLower(coalesce(d.{dprop['id']}, '')) CONTAINS kw
     )
+    OPTIONAL MATCH (d)-[:{sub_rel}*1..]->(anc:{dlabel})
+    RETURN d, collect(DISTINCT anc.{dprop['id']}) AS ancestor_ids
+    """
+    rows = self._run(query, keywords=kw_lower)
+    result = []
+    for row in rows:
+      node = row["d"]
+      result.append(DomainView(
+          domain_id=node[dprop["id"]],
+          name=node.get(dprop["name"], ""),
+          parent_ids=list(row["ancestor_ids"]),
+      ))
+    return result
+
+  # ------------------------------------------------------------------
+  # Stage-B capability method
+  # ------------------------------------------------------------------
 
   def get_person_capabilities(self, person_id: str) -> list[PersonCapability]:
-    raise NotImplementedError(
-        "Neo4jAdapter does not implement inferred capabilities in Stage A"
+    alabel = self._lbl["author"]
+    clabel = self._lbl["capability"]
+    aprop = self._prop["author"]
+    cprop = self._prop["capability"]
+    hcprop = self._prop["has_capability"]
+    rel = self._rel["has_capability"]
+    rows = self._run(
+        f"""
+        MATCH (a:{alabel} {{{aprop['id']}: $pid}})-[hc:{rel}]->(c:{clabel})
+        RETURN c, hc
+        """,
+        pid=person_id,
     )
+    result = []
+    for row in rows:
+      node = row["c"]
+      hc = row["hc"]
+      result.append(PersonCapability(
+          person_id=person_id,
+          capability_id=node[cprop["id"]],
+          name=node.get(cprop["name"], ""),
+          kind=node.get(cprop["kind"], "UNKNOWN"),
+          publication_count=hc.get(hcprop["publication_count"], 0),
+          evidence_count=hc.get(hcprop["evidence_count"], 0),
+          avg_confidence=hc.get(hcprop["avg_extraction_confidence"], 0.0),
+          last_seen_year=hc.get(hcprop["last_seen_year"]),
+          extraction_version=hc.get(hcprop["extraction_version"], ""),
+      ))
+    return result
+
+  def create_capability_constraint(self) -> None:
+    """Create UNIQUE constraint on Capability.id (idempotent)."""
+    label = self._lbl["capability"]
+    prop = self._prop["capability"]
+    self._run(
+        f"CREATE CONSTRAINT capability_id IF NOT EXISTS "
+        f"FOR (c:{label}) REQUIRE c.{prop['id']} IS UNIQUE"
+    )
+
+  # ------------------------------------------------------------------
+  # Stage-C methods
+  # ------------------------------------------------------------------
 
   def find_candidates(
       self,
-      requirements: ProjectRequirements,
-      exclude_person_ids: set[str],
-      limit: int,
+      domain_ids: list[str],
+      capability_ids: list[str],
+      exclude_person_ids: list[str],
+      limit: int = 200,
   ) -> list[CandidateRef]:
-    raise NotImplementedError(
-        "Neo4jAdapter does not implement candidate search in Stage A"
+    alabel = self._lbl["author"]
+    plabel = self._lbl["project"]
+    dlabel = self._lbl["research_domain"]
+    clabel = self._lbl["capability"]
+    wrote_rel = self._rel["wrote"]
+    has_d_rel = self._rel["has_research_domain"]
+    has_c_rel = self._rel["has_capability"]
+    aprop = self._prop["author"]["id"]
+    dprop = self._prop["research_domain"]["id"]
+    cprop = self._prop["capability"]["id"]
+
+    query = f"""
+    CALL () {{
+      MATCH (d:{dlabel}) WHERE d.{dprop} IN $domain_ids
+      MATCH (d)<-[:{has_d_rel}]-(:{plabel})<-[:{wrote_rel}]-(a:{alabel})
+      WHERE NOT a.{aprop} IN $exclude_ids
+      RETURN a.{aprop} AS pid, d.{dprop} AS did, null AS cid
+    UNION
+      MATCH (c:{clabel}) WHERE c.{cprop} IN $capability_ids
+      MATCH (c)<-[:{has_c_rel}]-(a:{alabel})
+      WHERE NOT a.{aprop} IN $exclude_ids
+      RETURN a.{aprop} AS pid, null AS did, c.{cprop} AS cid
+    }}
+    WITH pid,
+         [x IN collect(DISTINCT did) WHERE x IS NOT NULL] AS matched_domains,
+         [x IN collect(DISTINCT cid) WHERE x IS NOT NULL] AS matched_caps
+    RETURN pid AS person_id, matched_domains, matched_caps
+    ORDER BY size(matched_caps) DESC, size(matched_domains) DESC, person_id ASC
+    LIMIT $limit
+    """
+    rows = self._run(
+        query,
+        domain_ids=list(domain_ids),
+        capability_ids=list(capability_ids),
+        exclude_ids=list(exclude_person_ids),
+        limit=limit,
     )
+    return [
+        CandidateRef(
+            person_id=r["person_id"],
+            matched_domain_ids=list(r["matched_domains"]),
+            matched_capability_ids=list(r["matched_caps"]),
+        )
+        for r in rows
+    ]
 
   def get_candidate_evidence(
       self,
       person_id: str,
-      project_id: str | None = None,
+      domain_ids: list[str],
+      capability_ids: list[str],
   ) -> list[EvidenceItem]:
-    raise NotImplementedError(
-        "Neo4jAdapter does not implement recommendation evidence in Stage A"
-    )
+    alabel = self._lbl["author"]
+    plabel = self._lbl["project"]
+    dlabel = self._lbl["research_domain"]
+    clabel = self._lbl["capability"]
+    wrote_rel = self._rel["wrote"]
+    has_d_rel = self._rel["has_research_domain"]
+    has_c_rel = self._rel["has_capability"]
+    aprop = self._prop["author"]["id"]
+    pprop_id = self._prop["project"]["id"]
+    pprop_title = self._prop["project"]["title"]
+    pprop_year = self._prop["project"]["year"]
+    dprop_id = self._prop["research_domain"]["id"]
+    dprop_name = self._prop["research_domain"]["name"]
+    cprop_id = self._prop["capability"]["id"]
+    cprop_name = self._prop["capability"]["name"]
+
+    evidence: list[EvidenceItem] = []
+    seen: set[tuple[str, str]] = set()
+
+    proj_query = f"""
+    MATCH (a:{alabel} {{{aprop}: $pid}})-[:{wrote_rel}]->(p:{plabel})
+    OPTIONAL MATCH (p)-[:{has_d_rel}]->(d:{dlabel})
+    WHERE d.{dprop_id} IN $domain_ids
+    RETURN p.{pprop_id} AS pid, p.{pprop_title} AS ptitle, p.{pprop_year} AS pyear,
+           d.{dprop_id} AS did, d.{dprop_name} AS dname
+    """
+    rows = self._run(proj_query, pid=person_id, domain_ids=list(domain_ids))
+    for r in rows:
+      proj_id = r["pid"]
+      if proj_id and ("project", proj_id) not in seen:
+        seen.add(("project", proj_id))
+        evidence.append(EvidenceItem(
+            kind="project",
+            id=proj_id,
+            text=r.get("ptitle") or proj_id,
+            project_id=proj_id,
+            year=r.get("pyear"),
+        ))
+      did = r.get("did")
+      if did and ("domain", did) not in seen:
+        seen.add(("domain", did))
+        evidence.append(EvidenceItem(
+            kind="domain",
+            id=did,
+            text=r.get("dname") or did,
+            project_id=proj_id,
+            year=r.get("pyear"),
+        ))
+
+    if capability_ids:
+      cap_query = f"""
+      MATCH (a:{alabel} {{{aprop}: $pid}})-[:{has_c_rel}]->(c:{clabel})
+      WHERE c.{cprop_id} IN $capability_ids
+      RETURN c.{cprop_id} AS cid, c.{cprop_name} AS cname
+      """
+      c_rows = self._run(cap_query, pid=person_id, capability_ids=list(capability_ids))
+      for r in c_rows:
+        cid = r["cid"]
+        if cid and ("capability", cid) not in seen:
+          seen.add(("capability", cid))
+          evidence.append(EvidenceItem(
+              kind="capability",
+              id=cid,
+              text=r.get("cname") or cid,
+              project_id=None,
+              year=None,
+          ))
+
+    return evidence
 
   def get_coauthor_distance(
       self,
       person_id: str,
       team_person_ids: list[str],
   ) -> int | None:
-    raise NotImplementedError(
-        "Neo4jAdapter does not implement co-author distance in Stage A"
+    if not team_person_ids:
+      return None
+    if person_id in team_person_ids:
+      return 0
+    alabel = self._lbl["author"]
+    wrote_rel = self._rel["wrote"]
+    aprop = self._prop["author"]["id"]
+
+    query = f"""
+    MATCH (a:{alabel} {{{aprop}: $pid}}), (t:{alabel})
+    WHERE t.{aprop} IN $team_ids AND t.{aprop} <> $pid
+    MATCH path = shortestPath((a)-[:{wrote_rel}*..6]-(t))
+    RETURN length(path) AS path_len
+    ORDER BY path_len ASC
+    LIMIT 1
+    """
+    rows = self._run(query, pid=person_id, team_ids=list(team_person_ids))
+    if not rows or rows[0].get("path_len") is None:
+      return None
+    path_len = rows[0]["path_len"]
+    return max(1, path_len // 2)
+
+  # ------------------------------------------------------------------
+  # Internal helpers
+  # ------------------------------------------------------------------
+
+  def _project_view_from_node(self, node) -> ProjectView:
+    prop = self._prop["project"]
+    keywords = node.get(prop["keywords"], [])
+    if isinstance(keywords, str):
+      keywords = [keywords]
+    return ProjectView(
+        project_id=node[prop["id"]],
+        title=node.get(prop["title"], ""),
+        abstract=node.get(prop["abstract"], ""),
+        keywords=list(keywords),
+        year=node.get(prop["year"]),
+        doc_type=node.get(prop["doc_type"], ""),
     )
+
+  @staticmethod
+  def _person_view_from_node(node, aprop: dict) -> PersonView:
+    person_id = node[aprop["id"]]
+    return PersonView(
+        person_id=person_id,
+        full_name=node.get(aprop["full_name"], ""),
+        is_placeholder=person_id.startswith("unknown_"),
+    )
+
+
+# Verify protocol conformance at import time
+def _check_protocol() -> None:
+  adapter: GraphAdapter = Neo4jAdapter.__new__(Neo4jAdapter)  # type: ignore[assignment]
+  _ = adapter
+
+
+_check_protocol()

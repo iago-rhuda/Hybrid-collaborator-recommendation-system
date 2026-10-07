@@ -1,0 +1,33 @@
+{
+  "project_id": "hal-003",
+  "domain_ids": [
+    "info.info-cr",
+    "info.info-ai",
+    "info"
+  ],
+  "required_capabilities": [
+    {
+      "name": "Federated Learning",
+      "importance": 0.9,
+      "source": "extracted",
+      "capability_id": "federated_learning"
+    },
+    {
+      "name": "Differential Privacy",
+      "importance": 0.85,
+      "source": "extracted",
+      "capability_id": "differential_privacy"
+    },
+    {
+      "name": "privacy-utility trade-off analysis",
+      "importance": 0.65,
+      "source": "extracted",
+      "capability_id": null
+    }
+  ],
+  "goals": [
+    "Train models across distributed clients without sharing raw data",
+    "Quantify the privacy-utility trade-off under varying epsilon values"
+  ],
+  "extraction_version": "req-v1"
+}

@@ -1,0 +1,33 @@
+{
+  "project_id": "hal-001",
+  "domain_ids": [
+    "info.info-ai",
+    "info.info-cl",
+    "info"
+  ],
+  "required_capabilities": [
+    {
+      "name": "Transformer Architecture",
+      "importance": 0.9,
+      "source": "extracted",
+      "capability_id": "transformer_architecture"
+    },
+    {
+      "name": "Natural Language Processing",
+      "importance": 0.8,
+      "source": "extracted",
+      "capability_id": "natural_language_processing"
+    },
+    {
+      "name": "multilingual text processing",
+      "importance": 0.6,
+      "source": "extracted",
+      "capability_id": null
+    }
+  ],
+  "goals": [
+    "Improve multilingual named entity recognition",
+    "Adapt transformer models for low-resource languages"
+  ],
+  "extraction_version": "req-v1"
+}

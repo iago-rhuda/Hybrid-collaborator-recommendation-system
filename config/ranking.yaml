@@ -1,0 +1,21 @@
+# Ranking configuration
+# Default engineering weights — not ground truth. Adjust per evaluation.
+
+weights:
+  gap_match: 0.30
+  domain_relevance: 0.15
+  semantic: 0.15
+  complementarity: 0.15
+  project_similarity: 0.10
+  graph: 0.10
+  recency: 0.05
+
+limits:
+  # Maximum candidates returned by find_candidates before ranking
+  max_candidates: 200
+
+  # Maximum results returned by the ranker
+  top_k_default: 10
+
+  # Maximum co-authorship hops to traverse (graph feature)
+  max_coauthor_hops: 3

@@ -1,26 +1,63 @@
-nodes:
-  project:
-    label: Project
-    key: halId
-    properties:
-      title: title
-      abstract: abstract
-      keywords: keywords
-      year: publicationYear
-      doc_type: documentType
-  person:
-    label: Author
-    key: halId
-    properties:
-      full_name: fullName
-      first_name: firstName
-      last_name: lastName
-  domain:
-    label: ResearchDomain
-    key: id
-    properties:
-      name: name
+# Graph Mapping Configuration
+# Maps logical names to physical Neo4j labels, relationship types and property names.
+# Only src/graph/neo4j_adapter.py reads this file — all other code uses the adapter interface.
+
+labels:
+  project: "Project"
+  author: "Author"
+  research_domain: "ResearchDomain"
+  organization: "Organization"
+  conference: "Conference"
+  capability: "Capability"
+
 relationships:
-  authorship: WROTE
-  project_domain: HAS_RESEARCH_DOMAIN
-  domain_parent: SUBDOMAIN_OF
+  wrote: "WROTE"
+  has_research_domain: "HAS_RESEARCH_DOMAIN"
+  subdomain_of: "SUBDOMAIN_OF"
+  has_organization: "HAS_ORGANIZATION"
+  part_of: "PART_OF"
+  presented_at: "PRESENTED_AT"
+  evidences_capability: "EVIDENCES_CAPABILITY"
+  has_capability: "HAS_CAPABILITY"
+
+properties:
+  project:
+    id: "halId"
+    title: "title"
+    abstract: "abstract"
+    keywords: "keywords"
+    year: "publicationYear"
+    doc_type: "documentType"
+  author:
+    id: "halId"
+    full_name: "fullName"
+  research_domain:
+    id: "id"
+    name: "name"
+  capability:
+    id: "id"
+    name: "name"
+    kind: "kind"
+    aliases: "aliases"
+  has_research_domain:
+    primary: "primary"
+  evidences_capability:
+    inferred: "inferred"
+    extraction_version: "extractionVersion"
+    extraction_method: "extractionMethod"
+    model: "model"
+    prompt_version: "promptVersion"
+    confidence: "confidence"
+    evidence_text: "evidenceText"
+    extracted_at: "extractedAt"
+  has_capability:
+    inferred: "inferred"
+    extraction_version: "extractionVersion"
+    aggregation_version: "aggregationVersion"
+    publication_count: "publicationCount"
+    evidence_count: "evidenceCount"
+    avg_extraction_confidence: "avgExtractionConfidence"
+    recent_publication_count: "recentPublicationCount"
+    first_seen_year: "firstSeenYear"
+    last_seen_year: "lastSeenYear"
+    score: "score"

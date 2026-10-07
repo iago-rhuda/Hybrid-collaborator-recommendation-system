@@ -1,0 +1,16 @@
+{
+  "project_id": null,
+  "domain_ids": [],
+  "required_capabilities": [
+    {
+      "name": "Deep Learning",
+      "importance": 0.63,
+      "source": "extracted",
+      "capability_id": null
+    }
+  ],
+  "goals": [
+    "Train models"
+  ],
+  "extraction_version": "req-v1"
+}
