@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterator
 
 from graph.adapter import (
   CandidateRef,
@@ -131,9 +130,11 @@ class FakeAdapter:
       self,
       limit: int = 100,
       offset: int = 0,
-  ) -> Iterator[ProjectView]:
+  ) -> list[ProjectView]:
+    if limit < 0 or offset < 0:
+      raise ValueError("limit and offset must be non-negative")
     items = sorted(self._projects.values(), key=lambda p: p.project_id)
-    yield from items[offset: offset + limit]
+    return items[offset: offset + limit]
 
   def get_project_members(self, project_id: str) -> list[PersonView]:
     return list(self._members.get(project_id, []))

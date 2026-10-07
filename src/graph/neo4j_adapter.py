@@ -14,11 +14,11 @@ No labels, relationship types or property names are hard-coded in this file.
 
 from __future__ import annotations
 
-from typing import Iterator
+from typing import Any
 
 from neo4j import GraphDatabase
 
-from config import get_neo4j_config, get_graph_mapping
+from config import get_graph_mapping, load_neo4j_settings
 from graph.adapter import (
   CandidateRef,
   DomainView,
@@ -33,9 +33,25 @@ from graph.adapter import (
 class Neo4jAdapter:
   """Live Neo4j implementation of the GraphAdapter protocol."""
 
-  def __init__(self, uri: str, user: str, password: str, database: str | None = None) -> None:
-    self._driver = GraphDatabase.driver(uri, auth=(user, password))
+  def __init__(
+      self,
+      uri: str | None = None,
+      user: str | None = None,
+      password: str | None = None,
+      database: str | None = None,
+      driver: Any | None = None,
+  ) -> None:
     self._database = database or None
+    self._owns_driver = driver is None
+    if driver is None:
+      if uri is None or user is None or password is None:
+        settings = load_neo4j_settings(database=database)
+        uri = uri if uri is not None else settings.uri
+        user = user if user is not None else settings.user
+        password = password if password is not None else settings.password
+        self._database = database or settings.database or None
+      driver = GraphDatabase.driver(uri, auth=(user, password))
+    self._driver = driver
     m = get_graph_mapping()
     self._lbl = m.get("labels", {})
     self._rel = m.get("relationships", {})
@@ -44,21 +60,22 @@ class Neo4jAdapter:
   @classmethod
   def from_config(cls) -> "Neo4jAdapter":
     """Construct from environment variables / config."""
-    cfg = get_neo4j_config()
+    settings = load_neo4j_settings()
     return cls(
-        uri=cfg["uri"],
-        user=cfg["user"],
-        password=cfg["password"],
-        database=cfg.get("database") or None,
+        uri=settings.uri,
+        user=settings.user,
+        password=settings.password,
+        database=settings.database,
     )
 
   def close(self) -> None:
-    self._driver.close()
+    if self._owns_driver:
+      self._driver.close()
 
   def __enter__(self) -> "Neo4jAdapter":
     return self
 
-  def __exit__(self, *args) -> None:
+  def __exit__(self, *args: Any) -> None:
     self.close()
 
   def _run(self, query: str, **params) -> list[dict]:
@@ -75,15 +92,22 @@ class Neo4jAdapter:
     label = self._lbl["project"]
     prop = self._prop["project"]
     rows = self._run(
-        f"MATCH (p:{label} {{{prop['id']}: $pid}}) RETURN p",
-        pid=project_id,
+        f"MATCH (p:{label} {{{prop['id']}: $project_id}}) RETURN p",
+        project_id=project_id,
     )
     if not rows:
       return None
-    node = rows[0]["p"]
-    return self._project_view_from_node(node)
+    return self._project_view_from_row(rows[0])
 
-  def iter_projects(self, limit: int = 100, offset: int = 0) -> Iterator[ProjectView]:
+  def iter_projects(
+      self,
+      limit: int = 100,
+      offset: int = 0,
+  ) -> list[ProjectView]:
+    if limit < 0 or offset < 0:
+      raise ValueError("limit and offset must be non-negative")
+    if limit == 0:
+      return []
     label = self._lbl["project"]
     prop = self._prop["project"]
     rows = self._run(
@@ -91,8 +115,7 @@ class Neo4jAdapter:
         offset=offset,
         limit=limit,
     )
-    for row in rows:
-      yield self._project_view_from_node(row["p"])
+    return [self._project_view_from_row(row) for row in rows]
 
   def get_project_members(self, project_id: str) -> list[PersonView]:
     plabel = self._lbl["project"]
@@ -102,12 +125,15 @@ class Neo4jAdapter:
     rel = self._rel["wrote"]
     rows = self._run(
         f"""
-        MATCH (a:{alabel})-[:{rel}]->(p:{plabel} {{{pprop['id']}: $pid}})
+        MATCH (a:{alabel})-[:{rel}]->(p:{plabel} {{{pprop['id']}: $project_id}})
         RETURN a
         """,
-        pid=project_id,
+        project_id=project_id,
     )
-    return [self._person_view_from_node(row["a"], aprop) for row in rows]
+    return [
+        self._person_view_from_node(row.get("a", row), aprop)
+        for row in rows
+    ]
 
   def get_project_domains(self, project_id: str) -> list[DomainView]:
     plabel = self._lbl["project"]
@@ -118,19 +144,22 @@ class Neo4jAdapter:
     sub_rel = self._rel["subdomain_of"]
     rows = self._run(
         f"""
-        MATCH (p:{plabel} {{{pprop['id']}: $pid}})-[:{rel}]->(d:{dlabel})
+        MATCH (p:{plabel} {{{pprop['id']}: $project_id}})-[:{rel}]->(assigned:{dlabel})
+        MATCH (assigned)-[:{sub_rel}*0..]->(d:{dlabel})
         OPTIONAL MATCH (d)-[:{sub_rel}*1..]->(anc:{dlabel})
         RETURN d, collect(DISTINCT anc.{dprop['id']}) AS ancestor_ids
         """,
-        pid=project_id,
+        project_id=project_id,
     )
     result = []
     for row in rows:
-      node = row["d"]
+      node = row.get("d", row)
       result.append(DomainView(
-          domain_id=node[dprop["id"]],
-          name=node.get(dprop["name"], ""),
-          parent_ids=list(row["ancestor_ids"]),
+          domain_id=node.get(dprop["id"], node.get("domain_id")),
+          name=node.get(dprop["name"], node.get("name", "")) or "",
+          parent_ids=list(
+              row.get("ancestor_ids", row.get("parent_ids", [])) or []
+          ),
       ))
     return result
 
@@ -371,26 +400,43 @@ class Neo4jAdapter:
   # Internal helpers
   # ------------------------------------------------------------------
 
-  def _project_view_from_node(self, node) -> ProjectView:
+  def _project_view_from_row(self, row: dict[str, Any]) -> ProjectView:
+    node = row.get("p", row)
+    return self._project_view_from_node(node)
+
+  def _project_view_from_node(self, node: Any) -> ProjectView:
     prop = self._prop["project"]
     keywords = node.get(prop["keywords"], [])
+    if keywords is None:
+      keywords = []
     if isinstance(keywords, str):
       keywords = [keywords]
+    year = node.get(prop["year"], node.get("year"))
     return ProjectView(
-        project_id=node[prop["id"]],
-        title=node.get(prop["title"], ""),
-        abstract=node.get(prop["abstract"], ""),
+        project_id=node.get(prop["id"], node.get("project_id")),
+        title=node.get(prop["title"], node.get("title", "")) or "",
+        abstract=node.get(prop["abstract"], node.get("abstract", "")) or "",
         keywords=list(keywords),
-        year=node.get(prop["year"]),
-        doc_type=node.get(prop["doc_type"], ""),
+        year=int(year) if year is not None else None,
+        doc_type=node.get(prop["doc_type"], node.get("doc_type", "")) or "",
     )
 
   @staticmethod
-  def _person_view_from_node(node, aprop: dict) -> PersonView:
-    person_id = node[aprop["id"]]
+  def _person_view_from_node(node: Any, aprop: dict) -> PersonView:
+    person_id = node.get(aprop["id"], node.get("person_id"))
+    full_name = node.get(aprop["full_name"], node.get("full_name"))
+    if not full_name:
+      full_name = " ".join(
+          value
+          for value in (
+              node.get("firstName", node.get("first_name", "")),
+              node.get("lastName", node.get("last_name", "")),
+          )
+          if value
+      )
     return PersonView(
         person_id=person_id,
-        full_name=node.get(aprop["full_name"], ""),
+        full_name=full_name or "",
         is_placeholder=person_id.startswith("unknown_"),
     )
 

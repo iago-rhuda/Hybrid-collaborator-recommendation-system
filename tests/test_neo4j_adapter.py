@@ -189,7 +189,7 @@ class Neo4jAdapterTest(unittest.TestCase):
     self.assertEqual(driver.calls[0][1], {"project_id": "hal-123"})
     self.assertIn("HAS_RESEARCH_DOMAIN", driver.calls[0][0])
 
-  def test_validates_pagination_and_keeps_future_methods_unimplemented(self):
+  def test_validates_pagination_and_returns_empty_capabilities(self):
     adapter = Neo4jAdapter(driver=FakeDriver([]))
 
     with self.assertRaises(ValueError):
@@ -197,8 +197,7 @@ class Neo4jAdapterTest(unittest.TestCase):
     with self.assertRaises(ValueError):
       adapter.iter_projects(limit=1, offset=-1)
     self.assertEqual(adapter.iter_projects(limit=0), [])
-    with self.assertRaisesRegex(NotImplementedError, "Stage A"):
-      adapter.get_person_capabilities("author-1")
+    self.assertEqual(adapter.get_person_capabilities("author-1"), [])
 
 
 if __name__ == "__main__":

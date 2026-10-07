@@ -14,7 +14,7 @@ Rules:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Iterator, Protocol
+from typing import Protocol
 
 
 # ---------------------------------------------------------------------------
@@ -127,8 +127,8 @@ class GraphAdapter(Protocol):
       self,
       limit: int = 100,
       offset: int = 0,
-  ) -> Iterator[ProjectView]:
-    """Yield projects in stable order, paginated by *limit* and *offset*."""
+  ) -> list[ProjectView]:
+    """Return projects in stable order, paginated by *limit* and *offset*."""
     ...
 
   def get_project_members(self, project_id: str) -> list[PersonView]:

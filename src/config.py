@@ -6,8 +6,10 @@ Usage:
 """
 
 import os
-import yaml
+from dataclasses import dataclass, field
 from pathlib import Path
+
+import yaml
 try:
   from dotenv import load_dotenv
   load_dotenv()
@@ -19,6 +21,64 @@ except ImportError:
 _SRC_DIR = Path(__file__).parent
 _PROJECT_ROOT = _SRC_DIR.parent
 _CONFIG_DIR = _PROJECT_ROOT / "config"
+DEFAULT_GRAPH_MAPPING_PATH = _CONFIG_DIR / "graph_mapping.yaml"
+
+
+@dataclass(frozen=True)
+class Neo4jSettings:
+  uri: str
+  user: str
+  password: str = field(repr=False)
+  database: str | None = None
+
+
+def load_neo4j_settings(database: str | None = None) -> Neo4jSettings:
+  """Load required Neo4j connection settings from the environment."""
+  load_dotenv()
+  values = {
+      "NEO4J_URI": os.getenv("NEO4J_URI"),
+      "NEO4J_USER": os.getenv("NEO4J_USER"),
+      "NEO4J_PASSWORD": os.getenv("NEO4J_PASSWORD"),
+  }
+  missing = [name for name, value in values.items() if not value]
+  if missing:
+    raise ValueError(
+        "Neo4j configuration is missing: " + ", ".join(missing)
+    )
+  return Neo4jSettings(
+      uri=values["NEO4J_URI"],
+      user=values["NEO4J_USER"],
+      password=values["NEO4J_PASSWORD"],
+      database=database if database is not None else os.getenv("NEO4J_DATABASE"),
+  )
+
+
+def load_graph_mapping(
+    path: str | Path = DEFAULT_GRAPH_MAPPING_PATH,
+) -> dict:
+  """Load the graph mapping and expose the logical node mapping aliases."""
+  with Path(path).open(encoding="utf-8") as mapping_file:
+    mapping = yaml.safe_load(mapping_file)
+  if not isinstance(mapping, dict):
+    raise ValueError("Graph mapping must contain a top-level mapping")
+
+  labels = mapping.get("labels", {})
+  properties = mapping.get("properties", {})
+  nodes = mapping.setdefault("nodes", {})
+  for logical_name, label in labels.items():
+    node = nodes.setdefault(logical_name, {})
+    node.setdefault("label", label)
+    node.setdefault("key", properties.get(logical_name, {}).get("id"))
+    if logical_name in properties:
+      node.setdefault("properties", {
+          name: value
+          for name, value in properties[logical_name].items()
+          if name != "id"
+      })
+  relationships = mapping.get("relationships", {})
+  if "wrote" in relationships:
+    relationships.setdefault("authorship", relationships["wrote"])
+  return mapping
 
 
 def _load_yaml(filename: str) -> dict:
@@ -42,7 +102,7 @@ def get_neo4j_config() -> dict:
 
 def get_graph_mapping() -> dict:
   """Return graph mapping configuration (labels, relationships, properties)."""
-  return _load_yaml("graph_mapping.yaml")
+  return load_graph_mapping()
 
 
 def get_capability_config() -> dict:
