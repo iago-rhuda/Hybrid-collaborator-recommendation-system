@@ -63,6 +63,15 @@ class PersonCapability:
 
 
 @dataclass(frozen=True)
+class CapabilityView:
+  """Read-only view of a canonical Capability node."""
+  capability_id: str
+  name: str
+  kind: str
+  aliases: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class RequiredCapability:
   """A capability required by a project, sourced from extraction or user input."""
   name: str
@@ -141,6 +150,10 @@ class GraphAdapter(Protocol):
 
   def get_person_capabilities(self, person_id: str) -> list[PersonCapability]:
     """Return all aggregated capabilities for the given author."""
+    ...
+
+  def find_capabilities_by_terms(self, terms: list[str]) -> list[CapabilityView]:
+    """Return canonical capabilities matching normalized user/search terms."""
     ...
 
   def find_candidates(

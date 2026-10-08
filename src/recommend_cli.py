@@ -38,7 +38,8 @@ _STOPWORDS = {
     "projeto", "pesquisa", "preciso", "busco", "procuro", "quero", "encontrar",
     "the", "a", "an", "and", "or", "in", "on", "at", "to", "for", "with", "without",
     "by", "of", "from", "as", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "project", "research", "study",
+    "have", "about", "has", "had", "do", "does", "did", "project", "research", "study",
+    "write", "writing", "article", "paper",
     "looking", "need", "want", "seeking", "find", "collaborator", "collaborators",
     "le", "la", "les", "un", "une", "des", "du", "de", "dans", "en", "sur", "pour",
     "avec", "sans", "par", "et", "ou", "est", "sont", "projet", "recherche",
@@ -52,18 +53,16 @@ def extract_keywords_from_query(query: str) -> list[str]:
   tokens = [t.strip() for t in cleaned.split() if len(t.strip()) > 2]
   meaningful = [t for t in tokens if t not in _STOPWORDS]
 
-  # Generate unigrams and bigrams
+  # Generate phrases before single words so technical multi-word capabilities
+  # are preserved even when the query is written as a full sentence.
   keywords: list[str] = []
-  for w in meaningful:
-    if w not in keywords:
-      keywords.append(w)
+  for size in (3, 2, 1):
+    for i in range(len(meaningful) - size + 1):
+      phrase = " ".join(meaningful[i:i + size])
+      if phrase not in keywords:
+        keywords.append(phrase)
 
-  for i in range(len(meaningful) - 1):
-    bigram = f"{meaningful[i]} {meaningful[i+1]}"
-    if bigram not in keywords:
-      keywords.append(bigram)
-
-  return keywords[:10]
+  return keywords[:30]
 
 
 class LiveGeminiExplanationLLM(ExplanationLLMBackend):

@@ -19,8 +19,10 @@ from typing import Any
 from neo4j import GraphDatabase
 
 from config import get_graph_mapping, load_neo4j_settings
+from capability.normalization import normalize, to_capability_id
 from graph.adapter import (
   CandidateRef,
+  CapabilityView,
   DomainView,
   EvidenceItem,
   GraphAdapter,
@@ -224,6 +226,45 @@ class Neo4jAdapter:
           avg_confidence=hc.get(hcprop["avg_extraction_confidence"], 0.0),
           last_seen_year=hc.get(hcprop["last_seen_year"]),
           extraction_version=hc.get(hcprop["extraction_version"], ""),
+      ))
+    return result
+
+  def find_capabilities_by_terms(self, terms: list[str]) -> list[CapabilityView]:
+    """Find canonical Capability nodes matching normalized terms."""
+    clean_terms = [term for term in terms if term and term.strip()]
+    if not clean_terms:
+      return []
+
+    term_ids = sorted({to_capability_id(term) for term in clean_terms})
+    term_names = sorted({normalize(term) for term in clean_terms})
+    clabel = self._lbl["capability"]
+    cprop = self._prop["capability"]
+
+    rows = self._run(
+        f"""
+        MATCH (c:{clabel})
+        WHERE c.{cprop['id']} IN $term_ids
+           OR toLower(coalesce(c.{cprop['name']}, '')) IN $term_names
+           OR any(alias IN coalesce(c.{cprop['aliases']}, [])
+                  WHERE toLower(toString(alias)) IN $term_names)
+        RETURN c
+        ORDER BY c.{cprop['id']}
+        """,
+        term_ids=term_ids,
+        term_names=term_names,
+    )
+
+    result: list[CapabilityView] = []
+    for row in rows:
+      node = row["c"]
+      aliases = node.get(cprop["aliases"], []) or []
+      if isinstance(aliases, str):
+        aliases = [aliases]
+      result.append(CapabilityView(
+          capability_id=node[cprop["id"]],
+          name=node.get(cprop["name"], ""),
+          kind=node.get(cprop["kind"], "UNKNOWN"),
+          aliases=list(aliases),
       ))
     return result
 

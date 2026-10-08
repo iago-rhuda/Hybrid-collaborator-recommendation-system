@@ -15,6 +15,7 @@ from pathlib import Path
 
 from graph.adapter import (
   CandidateRef,
+  CapabilityView,
   DomainView,
   EvidenceItem,
   GraphAdapter,
@@ -98,6 +99,7 @@ class FakeAdapter:
 
     # person_id -> list[PersonCapability]
     self._capabilities: dict[str, list[PersonCapability]] = {}
+    self._capability_index: dict[str, CapabilityView] = {}
     for raw in raw_caps:
       pid = raw["person_id"]
       cap = PersonCapability(
@@ -112,6 +114,13 @@ class FakeAdapter:
           extraction_version=raw.get("extraction_version", "capability-v1"),
       )
       self._capabilities.setdefault(pid, []).append(cap)
+      if cap.capability_id not in self._capability_index:
+        self._capability_index[cap.capability_id] = CapabilityView(
+            capability_id=cap.capability_id,
+            name=cap.name,
+            kind=cap.kind,
+            aliases=[],
+        )
       if pid not in self._persons:
         self._persons[pid] = PersonView(
             person_id=pid,
@@ -158,6 +167,26 @@ class FakeAdapter:
 
   def get_person_capabilities(self, person_id: str) -> list[PersonCapability]:
     return list(self._capabilities.get(person_id, []))
+
+  def find_capabilities_by_terms(self, terms: list[str]) -> list[CapabilityView]:
+    """Find canonical capabilities matching exact normalized names or ids."""
+    from capability.normalization import normalize, to_capability_id
+
+    requested_ids = {to_capability_id(term) for term in terms if term.strip()}
+    requested_names = {normalize(term) for term in terms if term.strip()}
+    matched: dict[str, CapabilityView] = {}
+
+    for cap in self._capability_index.values():
+      cap_name = normalize(cap.name)
+      alias_names = {normalize(alias) for alias in cap.aliases}
+      if (
+          cap.capability_id in requested_ids
+          or cap_name in requested_names
+          or bool(alias_names & requested_names)
+      ):
+        matched[cap.capability_id] = cap
+
+    return [matched[cap_id] for cap_id in sorted(matched)]
 
   # ------------------------------------------------------------------
   # Stage-C methods

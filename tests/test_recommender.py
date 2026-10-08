@@ -169,6 +169,28 @@ class TestCandidates(unittest.TestCase):
     self.assertEqual(len(candidates), 1)
     self.assertTrue(candidates[0].is_placeholder)
 
+  def test_spec_requirements_keep_only_real_capabilities(self):
+    spec = ProjectSpec(
+        title="I want to write an article about federated learning",
+        abstract="",
+        keywords=["write", "article", "federated learning", "about federated"],
+    )
+
+    result = recommend_collaborators(
+        adapter=self.adapter,
+        spec=spec,
+        top_k=3,
+    )
+
+    self.assertEqual(
+        [
+            capability.capability_id
+            for capability in result.requirements.required_capabilities
+        ],
+        ["federated_learning"],
+    )
+    self.assertGreater(len(result.candidates), 0)
+
 
 class TestFeatures(unittest.TestCase):
   """Tests for the 7 pure recommendation features in [0.0, 1.0]."""

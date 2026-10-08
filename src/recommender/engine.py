@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Sequence
 
 from graph.adapter import (
+  CapabilityView,
   DomainView,
   GraphAdapter,
   PersonCapability,
@@ -80,6 +81,7 @@ def recommend_collaborators(
   target_title = ""
   effective_team_ids: list[str] = []
   target_domains: list[DomainView] = []
+  matched_capabilities: list[CapabilityView] = []
 
   if project_id:
     project_view = adapter.get_project(project_id)
@@ -97,6 +99,8 @@ def recommend_collaborators(
       target_title = spec.title
       if spec.keywords and hasattr(adapter, "find_domains_by_keywords"):
         target_domains = adapter.find_domains_by_keywords(spec.keywords)
+      if spec.keywords and hasattr(adapter, "find_capabilities_by_terms"):
+        matched_capabilities = adapter.find_capabilities_by_terms(spec.keywords)
 
   # Build or use requirements
   if requirements is None:
@@ -109,15 +113,24 @@ def recommend_collaborators(
     # Derive requirements from spec or project domains
     req_caps: list[RequiredCapability] = []
     if spec and spec.keywords:
-      from capability.normalization import to_capability_id
-      for kw in spec.keywords:
-        cid = to_capability_id(kw)
-        req_caps.append(RequiredCapability(
-            name=kw,
-            importance=0.8,
-            source="spec",
-            capability_id=cid,
-        ))
+      if matched_capabilities:
+        for cap in matched_capabilities:
+          req_caps.append(RequiredCapability(
+              name=cap.name,
+              importance=0.8,
+              source="capability_lookup",
+              capability_id=cap.capability_id,
+          ))
+      elif not hasattr(adapter, "find_capabilities_by_terms"):
+        from capability.normalization import to_capability_id
+        for kw in spec.keywords:
+          cid = to_capability_id(kw)
+          req_caps.append(RequiredCapability(
+              name=kw,
+              importance=0.8,
+              source="spec",
+              capability_id=cid,
+          ))
 
     requirements = ProjectRequirements(
         project_id=project_id,

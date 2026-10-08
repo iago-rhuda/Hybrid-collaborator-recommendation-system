@@ -98,6 +98,19 @@ class FakeAdapterTest(unittest.TestCase):
       self.adapter.iter_projects(limit=1, offset=-1)
     self.assertEqual(self.adapter.get_person_capabilities("author-001"), [])
 
+  def test_finds_only_canonical_capabilities_for_terms(self):
+    capabilities = self.adapter.find_capabilities_by_terms([
+        "write",
+        "article",
+        "federated learning",
+        "Differential Privacy",
+    ])
+
+    self.assertEqual(
+        [cap.capability_id for cap in capabilities],
+        ["differential_privacy", "federated_learning"],
+    )
+
 
 if __name__ == "__main__":
   unittest.main()
