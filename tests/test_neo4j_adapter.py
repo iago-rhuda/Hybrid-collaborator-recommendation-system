@@ -1,6 +1,6 @@
 import unittest
 
-from graph.adapter import DomainView, PersonView, ProjectView
+from graph.adapter import CapabilityView, DomainView, PersonView, ProjectView
 from graph.neo4j_adapter import Neo4jAdapter
 
 
@@ -198,6 +198,43 @@ class Neo4jAdapterTest(unittest.TestCase):
       adapter.iter_projects(limit=1, offset=-1)
     self.assertEqual(adapter.iter_projects(limit=0), [])
     self.assertEqual(adapter.get_person_capabilities("author-1"), [])
+
+  def test_finds_capabilities_by_normalized_terms(self):
+    driver = FakeDriver([
+        ("MATCH (c:Capability)", [{
+            "c": {
+                "id": "federated_learning",
+                "name": "Federated Learning",
+                "kind": "METHOD",
+                "aliases": ["Collaborative Learning"],
+            },
+        }]),
+    ])
+    adapter = Neo4jAdapter(driver=driver)
+
+    capabilities = adapter.find_capabilities_by_terms([
+        "write",
+        "federated learning",
+        "collaborative learning",
+    ])
+
+    self.assertEqual(
+        capabilities,
+        [
+            CapabilityView(
+                capability_id="federated_learning",
+                name="Federated Learning",
+                kind="METHOD",
+                aliases=["Collaborative Learning"],
+            ),
+        ],
+    )
+    query, parameters = driver.calls[0]
+    self.assertIn("c.id IN $term_ids", query)
+    self.assertIn("c.aliases", query)
+    self.assertIn("federated_learning", parameters["term_ids"])
+    self.assertIn("federated learning", parameters["term_names"])
+    self.assertIn("collaborative learning", parameters["term_names"])
 
 
 if __name__ == "__main__":
